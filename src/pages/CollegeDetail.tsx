@@ -1,28 +1,74 @@
-
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Star, MapPin, Calendar, Users } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { getCollegeBySlug } from "@/services/collegeService";
 
 const CollegeDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
 
-  // Mock college data - in a real app, this would come from an API
-  const college = {
-    id: id,
-    name: "PSG College of Technology",
-    location: "Coimbatore, Tamil Nadu",
-    established: "1951",
-    rating: 4.4,
-    type: "Private Institute",
-    logo: "https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop",
-    heroImage: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&h=400&fit=crop",
+  // Validate slug format
+  useEffect(() => {
+    if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
+      console.error("Invalid slug format:", slug);
+      navigate("/404", { replace: true });
+      return;
+    }
+  }, [slug, navigate]);
+
+  const { data: college, isLoading, error } = useQuery({
+    queryKey: ['college', slug],
+    queryFn: () => getCollegeBySlug(slug!),
+    enabled: !!slug,
+  });
+
+  // Handle college not found
+  useEffect(() => {
+    if (!isLoading && !college && !error) {
+      console.error("College not found for slug:", slug);
+      navigate("/404", { replace: true });
+    }
+  }, [college, isLoading, error, slug, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onBookingClick={() => setIsBookingModalOpen(true)} />
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-3/4 mx-auto"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+            <div className="h-64 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error || !college) {
+    return null; // Navigation to 404 is handled in useEffect
+  }
+
+  const tabs = [
+    { id: "info", label: "Info" },
+    { id: "admission", label: "Admission Process" },
+    { id: "courses", label: "Courses" },
+    { id: "placements", label: "Placements" },
+    { id: "rankings", label: "Rankings" },
+    { id: "facilities", label: "Facilities" }
+  ];
+
+  // Mock data for now - in real app this would come from the database
+  const mockData = {
     description: "PSG College of Technology, commonly known as PSGCT was established in 1951 as the first private Engineering Institution in Tamil Nadu by G.R. Damodaran. It is affiliated to Anna University and is located in Coimbatore. PSGCT is ranked 63rd position in the Engineering category & 89th position in the Management category by NIRF 2023.",
     courses: [
       { name: "BTech", duration: "4 years", eligibility: "Passed 10+2 with PCM", selectionBasis: "TNEA Counselling" },
@@ -34,17 +80,6 @@ const CollegeDetail = () => {
       { agency: "NIRF (Management)", year: "2023", rank: "89" },
       { agency: "NIRF (Engineering)", year: "2023", rank: "63" }
     ],
-    facilities: [
-      "Library: Over 2 lakh volumes in Science, Engineering, Management & Science",
-      "Computer & Network: Internet connection with 1300 Mbps bandwidth available",
-      "Sports Facilities: Both outdoor and indoor sports facilities available",
-      "Extracurricular Activities: 20+ student clubs and functions available"
-    ],
-    faculty: {
-      professors: "150+",
-      associateProfessors: "99",
-      assistantProfessors: "300"
-    },
     placements: {
       year: "2020",
       totalPlaced: "1130",
@@ -55,15 +90,6 @@ const CollegeDetail = () => {
     }
   };
 
-  const tabs = [
-    { id: "info", label: "Info" },
-    { id: "admission", label: "Admission Process" },
-    { id: "courses", label: "Courses" },
-    { id: "placements", label: "Placements" },
-    { id: "rankings", label: "Rankings" },
-    { id: "facilities", label: "Facilities" }
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       <Header onBookingClick={() => setIsBookingModalOpen(true)} />
@@ -71,7 +97,7 @@ const CollegeDetail = () => {
       {/* Hero Section */}
       <div className="relative h-96 bg-gradient-to-r from-blue-900 to-blue-700">
         <img
-          src={college.heroImage}
+          src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&h=400&fit=crop"
           alt={college.name}
           className="w-full h-full object-cover opacity-30"
         />
@@ -81,7 +107,7 @@ const CollegeDetail = () => {
           <div className="max-w-7xl mx-auto px-4 w-full">
             <div className="flex items-start space-x-6 text-white">
               <img
-                src={college.logo}
+                src="https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop"
                 alt={college.name}
                 className="w-24 h-24 rounded-lg bg-white p-2"
               />
@@ -98,7 +124,7 @@ const CollegeDetail = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span>{college.rating}</span>
+                    <span>4.4</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
@@ -154,19 +180,19 @@ const CollegeDetail = () => {
             {activeTab === "info" && (
               <div className="space-y-8">
                 <div>
-                  <p className="text-gray-700 leading-relaxed">{college.description}</p>
+                  <p className="text-gray-700 leading-relaxed">{mockData.description}</p>
                 </div>
                 
                 <div>
                   <h3 className="text-2xl font-bold mb-4">Table of Contents</h3>
                   <div className="bg-blue-50 rounded-lg p-6">
                     <ol className="space-y-2 text-blue-600">
-                      <li>1. PSG College of Technology Courses Offered</li>
-                      <li>2. PSG College of Technology Admission</li>
-                      <li>3. PSG College of Technology Placements</li>
-                      <li>4. PSG College of Technology Courses Ranking</li>
-                      <li>5. PSG College of Technology Facilities</li>
-                      <li>6. PSG College of Technology Faculty</li>
+                      <li>1. {college.name} Courses Offered</li>
+                      <li>2. {college.name} Admission</li>
+                      <li>3. {college.name} Placements</li>
+                      <li>4. {college.name} Courses Ranking</li>
+                      <li>5. {college.name} Facilities</li>
+                      <li>6. {college.name} Faculty</li>
                     </ol>
                   </div>
                 </div>
@@ -175,7 +201,7 @@ const CollegeDetail = () => {
 
             {activeTab === "courses" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6">PSG College of Technology Courses Offered</h3>
+                <h3 className="text-2xl font-bold mb-6">{college.name} Courses Offered</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-300">
                     <thead>
@@ -186,7 +212,7 @@ const CollegeDetail = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {college.courses.map((course, index) => (
+                      {mockData.courses.map((course, index) => (
                         <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
                           <td className="border border-gray-300 px-4 py-3 font-semibold">{course.name}</td>
                           <td className="border border-gray-300 px-4 py-3">
@@ -204,7 +230,7 @@ const CollegeDetail = () => {
 
             {activeTab === "rankings" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6">PSG College of Technology Courses Ranking</h3>
+                <h3 className="text-2xl font-bold mb-6">{college.name} Courses Ranking</h3>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse border border-gray-300">
                     <thead>
@@ -215,7 +241,7 @@ const CollegeDetail = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {college.rankings.map((ranking, index) => (
+                      {mockData.rankings.map((ranking, index) => (
                         <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
                           <td className="border border-gray-300 px-4 py-3">{ranking.agency}</td>
                           <td className="border border-gray-300 px-4 py-3">{ranking.year}</td>
@@ -230,7 +256,7 @@ const CollegeDetail = () => {
 
             {activeTab === "facilities" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6">PSG College of Technology Facilities</h3>
+                <h3 className="text-2xl font-bold mb-6">{college.name} Facilities</h3>
                 <div className="space-y-4">
                   {college.facilities.map((facility, index) => (
                     <div key={index} className="flex items-start space-x-3">
@@ -244,19 +270,19 @@ const CollegeDetail = () => {
 
             {activeTab === "placements" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6">PSG College of Technology Placements</h3>
+                <h3 className="text-2xl font-bold mb-6">{college.name} Placements</h3>
                 <p className="text-gray-700 mb-4">
-                  PSG College of Technology Placements {college.placements.year} has been concluded. 
-                  Reputed recruiters visited the campus. A total of {college.placements.totalPlaced} students were placed.
+                  {college.name} Placements {mockData.placements.year} has been concluded. 
+                  Reputed recruiters visited the campus. A total of {mockData.placements.totalPlaced} students were placed.
                 </p>
                 <div className="space-y-3">
                   <div className="flex items-start space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <p>The median CTC stood at {college.placements.medianCTCEngineering} for the Engineering students.</p>
+                    <p>The median CTC stood at {mockData.placements.medianCTCEngineering} for the Engineering students.</p>
                   </div>
                   <div className="flex items-start space-x-3">
                     <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    <p>The median CTC stood at {college.placements.medianCTCManagement} for the Management students.</p>
+                    <p>The median CTC stood at {mockData.placements.medianCTCManagement} for the Management students.</p>
                   </div>
                 </div>
               </div>
@@ -264,7 +290,7 @@ const CollegeDetail = () => {
 
             {activeTab === "admission" && (
               <div>
-                <h3 className="text-2xl font-bold mb-6">PSG College of Technology Admission</h3>
+                <h3 className="text-2xl font-bold mb-6">{college.name} Admission</h3>
                 <p className="text-gray-700 mb-6">
                   Admissions are based on entrances and counselling conducted by Anna University or national-level exams. 
                   There are also merit-based admissions for specific courses based on previous exam scores.
@@ -291,8 +317,8 @@ const CollegeDetail = () => {
                     </ul>
                     <div className="mt-3 p-4 bg-gray-50 rounded">
                       <p className="font-semibold">The Principal,</p>
-                      <p>PSG College of Technology,</p>
-                      <p>Peelamedu, Coimbatore – 641004</p>
+                      <p>{college.name},</p>
+                      <p>{college.location}</p>
                     </div>
                   </div>
                 </div>
@@ -335,8 +361,8 @@ const CollegeDetail = () => {
                     <span className="font-semibold">{college.type}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Rating:</span>
-                    <span className="font-semibold">{college.rating}/5</span>
+                    <span className="text-gray-600">District:</span>
+                    <span className="font-semibold">{college.district}</span>
                   </div>
                 </div>
               </CardContent>
