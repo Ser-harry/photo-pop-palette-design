@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ChevronDown, Search, Menu, X } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -11,7 +11,6 @@ interface HeaderProps {
 
 const Header = ({ onBookingClick }: HeaderProps) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -95,8 +94,8 @@ const Header = ({ onBookingClick }: HeaderProps) => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center justify-center flex-1 mx-8">
+          {/* Navigation */}
+          <nav className="flex items-center justify-center flex-1 mx-8">
             <div className="flex items-center space-x-1">
               {navItems.map((item) => (
                 <div
@@ -143,7 +142,7 @@ const Header = ({ onBookingClick }: HeaderProps) => {
           {/* Search and CTA */}
           <div className="flex items-center space-x-4">
             {/* Search Bar */}
-            <div className="hidden lg:flex items-center bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
+            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
               <Search size={18} className="text-gray-500 mr-2" />
               <Input
                 placeholder="Search colleges, courses..."
@@ -154,63 +153,12 @@ const Header = ({ onBookingClick }: HeaderProps) => {
             {/* Book Consultation Button */}
             <Button
               onClick={onBookingClick}
-              className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white px-6"
+              className="bg-orange-500 hover:bg-orange-600 text-white px-6"
             >
               Book Consultation
             </Button>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 py-4">
-            <div className="space-y-2">
-              {/* Mobile Search */}
-              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-4">
-                <Search size={18} className="text-gray-500 mr-2" />
-                <Input
-                  placeholder="Search colleges, courses..."
-                  className="bg-transparent border-none text-gray-700 placeholder:text-gray-500 focus:ring-0 focus:outline-none"
-                />
-              </div>
-
-              {/* Mobile Navigation */}
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                    item.isHighlighted
-                      ? "text-orange-500 hover:bg-orange-50"
-                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                  }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-
-              {/* Mobile CTA */}
-              <Button
-                onClick={() => {
-                  onBookingClick();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white"
-              >
-                Book Consultation
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );
