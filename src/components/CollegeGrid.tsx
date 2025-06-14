@@ -2,6 +2,7 @@
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 
 const CollegeGrid = () => {
@@ -16,7 +17,8 @@ const CollegeGrid = () => {
       ranking: "-",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: true
     },
     {
       id: "iit-kharagpur",
@@ -28,7 +30,8 @@ const CollegeGrid = () => {
       ranking: "#4 NIRF",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: false
     },
     {
       id: "iit-roorkee",
@@ -40,7 +43,8 @@ const CollegeGrid = () => {
       ranking: "#1 NIRF",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: true
     },
     {
       id: "iit-jodhpur",
@@ -52,7 +56,8 @@ const CollegeGrid = () => {
       ranking: "-",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1431576901776-e539bd916ba2?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: false
     },
     {
       id: "iit-delhi",
@@ -64,7 +69,8 @@ const CollegeGrid = () => {
       ranking: "#1 NIRF",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: true
     },
     {
       id: "dtu-delhi",
@@ -76,7 +82,8 @@ const CollegeGrid = () => {
       ranking: "#9 NIRF",
       fees: "-",
       logo: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=100&h=100&fit=crop",
-      badge: "UGC"
+      badge: "UGC",
+      featured: false
     }
   ];
 
@@ -114,7 +121,12 @@ const CollegeGrid = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {colleges.map((college) => (
             <Link key={college.id} to={`/college/${college.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer relative">
+                {college.featured && (
+                  <Badge className="absolute top-3 right-3 bg-orange-500 text-white hover:bg-orange-600 z-10">
+                    Featured
+                  </Badge>
+                )}
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4 mb-4">
                     <img
