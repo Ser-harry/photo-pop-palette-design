@@ -11,6 +11,9 @@ import Courses from "./pages/Courses";
 import Articles from "./pages/Articles";
 import CollegeDetail from "./pages/CollegeDetail";
 import TNEAPredictor from "./pages/TNEAPredictor";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import AboutUs from "./pages/AboutUs";
+import ContactUs from "./pages/ContactUs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +32,9 @@ const App = () => (
           <Route path="/articles" element={<Articles />} />
           <Route path="/college/:id" element={<CollegeDetail />} />
           <Route path="/tnea-predictor" element={<TNEAPredictor />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/contact-us" element={<ContactUs />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

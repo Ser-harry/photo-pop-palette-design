@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 const CollegeGrid = () => {
   const colleges = [
     {
-      id: 1,
+      id: "iit-madras",
       name: "IIT Madras - Indian Institute of Technology",
       location: "Chennai, Tamil Nadu",
       established: "1959",
@@ -19,7 +19,7 @@ const CollegeGrid = () => {
       badge: "UGC"
     },
     {
-      id: 2,
+      id: "iit-kharagpur",
       name: "IIT Kharagpur - Indian Institute of Technology",
       location: "Kharagpur, West Bengal",
       established: "1951",
@@ -31,7 +31,7 @@ const CollegeGrid = () => {
       badge: "UGC"
     },
     {
-      id: 3,
+      id: "iit-roorkee",
       name: "IIT Roorkee - Indian Institute of Technology",
       location: "Roorkee, Uttarakhand",
       established: "1847",
@@ -43,7 +43,7 @@ const CollegeGrid = () => {
       badge: "UGC"
     },
     {
-      id: 4,
+      id: "iit-jodhpur",
       name: "IIT Jodhpur - Indian Institute of Technology",
       location: "Jodhpur, Rajasthan",
       established: "2008",
@@ -55,7 +55,7 @@ const CollegeGrid = () => {
       badge: "UGC"
     },
     {
-      id: 5,
+      id: "iit-delhi",
       name: "IIT Delhi - Indian Institute of Technology",
       location: "Delhi, Delhi",
       established: "1961",
@@ -67,7 +67,7 @@ const CollegeGrid = () => {
       badge: "UGC"
     },
     {
-      id: 6,
+      id: "dtu-delhi",
       name: "DTU - Delhi Technological University",
       location: "Delhi, Delhi",
       established: "1941",

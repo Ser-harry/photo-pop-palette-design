@@ -1,4 +1,6 @@
+
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -58,11 +60,11 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Top Colleges</h3>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white">IIT Madras</a></li>
-                <li><a href="#" className="hover:text-white">IIT Kharagpur</a></li>
-                <li><a href="#" className="hover:text-white">IIT Roorkee</a></li>
-                <li><a href="#" className="hover:text-white">IIT Jodhpur</a></li>
-                <li><a href="#" className="hover:text-white">IIT Delhi</a></li>
+                <li><Link to="/college/iit-madras" className="hover:text-white">IIT Madras</Link></li>
+                <li><Link to="/college/iit-kharagpur" className="hover:text-white">IIT Kharagpur</Link></li>
+                <li><Link to="/college/iit-roorkee" className="hover:text-white">IIT Roorkee</Link></li>
+                <li><Link to="/college/iit-jodhpur" className="hover:text-white">IIT Jodhpur</Link></li>
+                <li><Link to="/college/iit-delhi" className="hover:text-white">IIT Delhi</Link></li>
               </ul>
             </div>
 
@@ -82,10 +84,10 @@ const Footer = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Others</h3>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#" className="hover:text-white">Privacy Policy</a></li>
+                <li><Link to="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
                 <li><a href="#" className="hover:text-white">Terms & Conditions</a></li>
-                <li><a href="#" className="hover:text-white">About Us</a></li>
-                <li><a href="#" className="hover:text-white">Contact Us</a></li>
+                <li><Link to="/about-us" className="hover:text-white">About Us</Link></li>
+                <li><Link to="/contact-us" className="hover:text-white">Contact Us</Link></li>
               </ul>
             </div>
           </div>

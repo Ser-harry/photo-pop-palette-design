@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Menu, X, Phone } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useLocation } from "react-router-dom";
@@ -26,27 +26,6 @@ const Header = ({ onBookingClick }: HeaderProps) => {
 
   return (
     <>
-      {/* Top Bar */}
-      <div className="bg-orange-500 text-white py-2">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center text-sm">
-          <div className="flex items-center space-x-4">
-            <span>📧 info@kollegeapply.com</span>
-            <span className="flex items-center">
-              <Phone className="w-4 h-4 mr-1" />
-              +91 9876543210
-            </span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <span>Follow Us:</span>
-            <div className="flex space-x-2">
-              <a href="#" className="hover:text-orange-200">FB</a>
-              <a href="#" className="hover:text-orange-200">TW</a>
-              <a href="#" className="hover:text-orange-200">IN</a>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Header */}
       <header className="bg-blue-900 text-white shadow-lg">
         <div className="max-w-7xl mx-auto px-4">
