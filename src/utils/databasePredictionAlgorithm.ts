@@ -74,12 +74,15 @@ export function predictCollegesFromDatabase(
           closingRank: cutoff.closing_rank
         }));
 
+        // Ensure type compatibility by casting to valid union type
+        const collegeType = college.type as "government" | "aided" | "self-financing";
+
         results.push({
           id: college.id,
           name: college.name,
           location: college.location,
           district: college.district,
-          type: college.type,
+          type: collegeType,
           naacGrade: college.naac_grade,
           established: college.established,
           website: college.website,
@@ -94,9 +97,9 @@ export function predictCollegesFromDatabase(
           probability,
           probabilityScore,
           fees: {
-            tuition: college.type === "government" ? 50000 : college.type === "aided" ? 75000 : 150000,
+            tuition: collegeType === "government" ? 50000 : collegeType === "aided" ? 75000 : 150000,
             hostel: 40000,
-            total: college.type === "government" ? 90000 : college.type === "aided" ? 115000 : 190000
+            total: collegeType === "government" ? 90000 : collegeType === "aided" ? 115000 : 190000
           }
         });
       }

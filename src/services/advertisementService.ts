@@ -26,13 +26,22 @@ export async function getActiveAds(placement?: string): Promise<DatabaseAdvertis
 
 export async function trackAdImpression(adId: string): Promise<void> {
   try {
-    const { error } = await supabase
+    // First get current impressions count
+    const { data: currentAd } = await supabase
       .from('advertisements')
-      .update({ impressions: supabase.sql`impressions + 1` })
-      .eq('id', adId);
-    
-    if (error) {
-      console.error('Error tracking ad impression:', error);
+      .select('impressions')
+      .eq('id', adId)
+      .single();
+
+    if (currentAd) {
+      const { error } = await supabase
+        .from('advertisements')
+        .update({ impressions: currentAd.impressions + 1 })
+        .eq('id', adId);
+      
+      if (error) {
+        console.error('Error tracking ad impression:', error);
+      }
     }
   } catch (error) {
     console.error('Error tracking ad impression:', error);
@@ -41,13 +50,22 @@ export async function trackAdImpression(adId: string): Promise<void> {
 
 export async function trackAdClick(adId: string): Promise<void> {
   try {
-    const { error } = await supabase
+    // First get current clicks count
+    const { data: currentAd } = await supabase
       .from('advertisements')
-      .update({ clicks: supabase.sql`clicks + 1` })
-      .eq('id', adId);
-    
-    if (error) {
-      console.error('Error tracking ad click:', error);
+      .select('clicks')
+      .eq('id', adId)
+      .single();
+
+    if (currentAd) {
+      const { error } = await supabase
+        .from('advertisements')
+        .update({ clicks: currentAd.clicks + 1 })
+        .eq('id', adId);
+      
+      if (error) {
+        console.error('Error tracking ad click:', error);
+      }
     }
   } catch (error) {
     console.error('Error tracking ad click:', error);
