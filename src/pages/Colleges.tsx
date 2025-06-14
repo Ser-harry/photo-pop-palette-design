@@ -4,10 +4,14 @@ import { Search, Filter, MapPin, Star, ChevronDown } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
+import Advertisement from "@/components/Advertisement";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { getColleges } from "@/services/collegeService";
 
 const Colleges = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -15,14 +19,19 @@ const Colleges = () => {
   const [selectedState, setSelectedState] = useState("all");
   const [showFilters, setShowFilters] = useState(false);
 
+  const { data: colleges = [], isLoading, error } = useQuery({
+    queryKey: ['colleges'],
+    queryFn: getColleges,
+  });
+
   const categories = [
-    { id: "all", name: "All Categories", count: 6000 },
-    { id: "engineering", name: "Engineering", count: 2500 },
-    { id: "medical", name: "Medical", count: 800 },
-    { id: "mba", name: "MBA", count: 1200 },
-    { id: "law", name: "Law", count: 400 },
-    { id: "arts", name: "Arts & Humanities", count: 600 },
-    { id: "commerce", name: "Commerce", count: 500 },
+    { id: "all", name: "All Categories", count: colleges.length },
+    { id: "engineering", name: "Engineering", count: colleges.filter(c => c.type === "Engineering").length },
+    { id: "medical", name: "Medical", count: colleges.filter(c => c.type === "Medical").length },
+    { id: "mba", name: "MBA", count: colleges.filter(c => c.type === "Management").length },
+    { id: "law", name: "Law", count: colleges.filter(c => c.type === "Law").length },
+    { id: "arts", name: "Arts & Humanities", count: colleges.filter(c => c.type === "Arts").length },
+    { id: "commerce", name: "Commerce", count: colleges.filter(c => c.type === "Commerce").length },
   ];
 
   const states = [
@@ -30,56 +39,44 @@ const Colleges = () => {
     "Uttar Pradesh", "West Bengal", "Gujarat", "Rajasthan", "Andhra Pradesh"
   ];
 
-  const colleges = [
-    {
-      id: 1,
-      name: "IIT Madras - Indian Institute of Technology",
-      location: "Chennai, Tamil Nadu",
-      established: "1959",
-      courses: "46+ Courses",
-      rating: 4.5,
-      ranking: "#1 NIRF Engineering",
-      fees: "₹2.5L - 8.5L",
-      logo: "https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop",
-      badge: "NIRF Ranked",
-      category: "engineering",
-      type: "Government"
-    },
-    {
-      id: 2,
-      name: "AIIMS Delhi - All India Institute of Medical Sciences",
-      location: "New Delhi, Delhi",
-      established: "1956",
-      courses: "28+ Courses",
-      rating: 4.7,
-      ranking: "#1 NIRF Medical",
-      fees: "₹1.2L - 3.5L",
-      logo: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=100&h=100&fit=crop",
-      badge: "NIRF Ranked",
-      category: "medical",
-      type: "Government"
-    },
-    {
-      id: 3,
-      name: "IIM Ahmedabad - Indian Institute of Management",
-      location: "Ahmedabad, Gujarat",
-      established: "1961",
-      courses: "12+ Courses",
-      rating: 4.6,
-      ranking: "#1 NIRF Management",
-      fees: "₹25L - 28L",
-      logo: "https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=100&h=100&fit=crop",
-      badge: "NIRF Ranked",
-      category: "mba",
-      type: "Government"
-    },
-    // ... add more colleges
-  ];
-
   const filteredColleges = colleges.filter(college => {
-    if (selectedCategory !== "all" && college.category !== selectedCategory) return false;
+    if (selectedCategory !== "all") {
+      const categoryTypeMap = {
+        "engineering": "Engineering",
+        "medical": "Medical", 
+        "mba": "Management",
+        "law": "Law",
+        "arts": "Arts",
+        "commerce": "Commerce"
+      };
+      if (college.type !== categoryTypeMap[selectedCategory]) return false;
+    }
     return true;
   });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onBookingClick={() => setIsBookingModalOpen(true)} />
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+          <p>Loading colleges...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header onBookingClick={() => setIsBookingModalOpen(true)} />
+        <div className="max-w-7xl mx-auto px-4 py-8 text-center">
+          <p>Error loading colleges. Please try again later.</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,7 +90,7 @@ const Colleges = () => {
               Find Your Perfect College
             </h1>
             <p className="text-xl opacity-90 mb-8">
-              Explore 6000+ colleges across India and make an informed choice
+              Explore {colleges.length}+ colleges across India and make an informed choice
             </p>
             
             {/* Search Bar */}
@@ -110,6 +107,13 @@ const Colleges = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Advertisement after hero section */}
+      <div className="py-4">
+        <div className="max-w-7xl mx-auto px-4">
+          <Advertisement placement="home" className="max-w-4xl mx-auto" />
         </div>
       </div>
 
@@ -180,6 +184,11 @@ const Colleges = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Sidebar Advertisement */}
+                <div className="mt-6">
+                  <Advertisement placement="sidebar" />
+                </div>
               </div>
             </div>
           </div>
@@ -200,12 +209,17 @@ const Colleges = () => {
 
             <div className="grid gap-6">
               {filteredColleges.map((college) => (
-                <Link key={college.id} to={`/college/${college.id}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <Link key={college.id} to={`/college/${college.slug}`}>
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer relative">
+                    {college.featured && (
+                      <Badge className="absolute top-3 right-3 bg-orange-500 text-white hover:bg-orange-600 z-10">
+                        Featured
+                      </Badge>
+                    )}
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
                         <img
-                          src={college.logo}
+                          src="https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop"
                           alt={college.name}
                           className="w-20 h-20 rounded-lg object-cover"
                         />
@@ -223,7 +237,7 @@ const Colleges = () => {
                             <div className="text-right">
                               <div className="flex items-center mb-1">
                                 <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                                <span className="font-semibold">{college.rating}</span>
+                                <span className="font-semibold">4.5</span>
                               </div>
                               <span className="text-sm text-gray-600">{college.type}</span>
                             </div>
@@ -232,25 +246,25 @@ const Colleges = () => {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                             <div>
                               <span className="text-gray-600 text-sm">Established</span>
-                              <p className="font-semibold">{college.established}</p>
+                              <p className="font-semibold">{college.established || "N/A"}</p>
                             </div>
                             <div>
                               <span className="text-gray-600 text-sm">Courses</span>
-                              <p className="font-semibold">{college.courses}</p>
+                              <p className="font-semibold">46+ Courses</p>
                             </div>
                             <div>
-                              <span className="text-gray-600 text-sm">Ranking</span>
-                              <p className="font-semibold text-orange-500">{college.ranking}</p>
+                              <span className="text-gray-600 text-sm">NAAC Grade</span>
+                              <p className="font-semibold text-orange-500">{college.naac_grade || "N/A"}</p>
                             </div>
                             <div>
-                              <span className="text-gray-600 text-sm">Fees</span>
-                              <p className="font-semibold">{college.fees}</p>
+                              <span className="text-gray-600 text-sm">District</span>
+                              <p className="font-semibold">{college.district}</p>
                             </div>
                           </div>
 
                           <div className="mt-4 flex justify-between items-center">
                             <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                              {college.badge}
+                              {college.type}
                             </span>
                             <div className="flex space-x-2">
                               <Button variant="outline" size="sm">
