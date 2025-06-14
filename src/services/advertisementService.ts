@@ -24,6 +24,81 @@ export async function getActiveAds(placement?: string): Promise<DatabaseAdvertis
   return (data || []) as DatabaseAdvertisement[];
 }
 
+export async function getAllAds(): Promise<DatabaseAdvertisement[]> {
+  const { data, error } = await supabase
+    .from('advertisements')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching all advertisements:', error);
+    throw error;
+  }
+
+  return (data || []) as DatabaseAdvertisement[];
+}
+
+export async function createAd(adData: {
+  title: string;
+  image_url: string;
+  target_url: string;
+  cta_text: string;
+  placement: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}): Promise<DatabaseAdvertisement> {
+  const { data, error } = await supabase
+    .from('advertisements')
+    .insert([adData])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating advertisement:', error);
+    throw error;
+  }
+
+  return data as DatabaseAdvertisement;
+}
+
+export async function updateAd(id: string, adData: Partial<{
+  title: string;
+  image_url: string;
+  target_url: string;
+  cta_text: string;
+  placement: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+}>): Promise<DatabaseAdvertisement> {
+  const { data, error } = await supabase
+    .from('advertisements')
+    .update(adData)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating advertisement:', error);
+    throw error;
+  }
+
+  return data as DatabaseAdvertisement;
+}
+
+export async function deleteAd(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('advertisements')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting advertisement:', error);
+    throw error;
+  }
+}
+
 export async function trackAdImpression(adId: string): Promise<void> {
   try {
     // First get current impressions count

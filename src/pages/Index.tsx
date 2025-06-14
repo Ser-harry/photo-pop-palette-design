@@ -10,6 +10,7 @@ import ExamsSection from "@/components/ExamsSection";
 import CitiesSection from "@/components/CitiesSection";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
+import Advertisement from "@/components/Advertisement";
 
 const Index = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -18,8 +19,26 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onBookingClick={() => setIsBookingModalOpen(true)} />
       <HeroSection />
+      
+      {/* Advertisement after hero section */}
+      <div className="py-4">
+        <div className="max-w-7xl mx-auto px-4">
+          <Advertisement placement="home" className="max-w-4xl mx-auto" />
+        </div>
+      </div>
+      
       <StatsSection />
-      <CollegeGrid />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto px-4 py-8">
+        <div className="lg:col-span-3">
+          <CollegeGrid />
+        </div>
+        <div className="lg:col-span-1">
+          {/* Sidebar advertisements */}
+          <Advertisement placement="sidebar" />
+        </div>
+      </div>
+      
       <div className="bg-blue-50 py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
