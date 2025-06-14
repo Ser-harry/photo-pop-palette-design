@@ -1,7 +1,8 @@
 
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 
 interface HeaderProps {
@@ -9,87 +10,153 @@ interface HeaderProps {
 }
 
 const Header = ({ onBookingClick }: HeaderProps) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Colleges", path: "/colleges" },
-    { name: "Exams", path: "/exams" },
-    { name: "Courses", path: "/courses" },
-    { name: "TNEA Predictor", path: "/tnea-predictor" },
-    { name: "Articles", path: "/articles" },
+    {
+      name: "Engineering",
+      hasDropdown: true,
+      path: "/colleges?category=engineering",
+      dropdownItems: [
+        { name: "Computer Science", path: "/colleges?category=engineering&field=cs" },
+        { name: "Mechanical", path: "/colleges?category=engineering&field=mechanical" },
+        { name: "Electronics", path: "/colleges?category=engineering&field=electronics" },
+        { name: "Civil", path: "/colleges?category=engineering&field=civil" },
+      ]
+    },
+    {
+      name: "Management",
+      hasDropdown: true,
+      path: "/colleges?category=mba",
+      dropdownItems: [
+        { name: "MBA", path: "/colleges?category=mba" },
+        { name: "PGDM", path: "/colleges?category=pgdm" },
+        { name: "Executive MBA", path: "/colleges?category=executive-mba" },
+      ]
+    },
+    {
+      name: "Medical",
+      hasDropdown: true,
+      path: "/colleges?category=medical",
+      dropdownItems: [
+        { name: "MBBS", path: "/colleges?category=medical&field=mbbs" },
+        { name: "BDS", path: "/colleges?category=medical&field=bds" },
+        { name: "Nursing", path: "/colleges?category=medical&field=nursing" },
+        { name: "Pharmacy", path: "/colleges?category=medical&field=pharmacy" },
+      ]
+    },
+    {
+      name: "Design",
+      hasDropdown: true,
+      path: "/colleges?category=design",
+      dropdownItems: [
+        { name: "Fashion Design", path: "/colleges?category=design&field=fashion" },
+        { name: "Interior Design", path: "/colleges?category=design&field=interior" },
+        { name: "Graphic Design", path: "/colleges?category=design&field=graphic" },
+      ]
+    },
+    {
+      name: "More",
+      hasDropdown: true,
+      path: "/colleges",
+      dropdownItems: [
+        { name: "Law", path: "/colleges?category=law" },
+        { name: "Arts", path: "/colleges?category=arts" },
+        { name: "Commerce", path: "/colleges?category=commerce" },
+        { name: "Science", path: "/colleges?category=science" },
+      ]
+    },
+    { name: "Online", path: "/colleges?mode=online", hasDropdown: false, isHighlighted: true },
+    { name: "Exams", path: "/exams", hasDropdown: false },
+    { name: "Articles", path: "/articles", hasDropdown: false },
+    { name: "Courses", path: "/courses", hasDropdown: false },
   ];
 
+  const handleMouseEnter = (itemName: string) => {
+    setActiveDropdown(itemName);
+  };
+
+  const handleMouseLeave = () => {
+    setActiveDropdown(null);
+  };
+
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-slate-800 text-white sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">K</span>
+            <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded flex items-center justify-center">
+              <span className="text-white font-bold text-sm">K</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">KollegeApply</span>
+            <span className="text-xl font-bold text-white">
+              Kollege<span className="text-orange-500">Apply</span>
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-8">
+          {/* Navigation */}
+          <nav className="hidden lg:flex items-center space-x-1">
             {navItems.map((item) => (
-              <Link
+              <div
                 key={item.name}
-                to={item.path}
-                className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
+                className="relative"
+                onMouseEnter={() => item.hasDropdown && handleMouseEnter(item.name)}
+                onMouseLeave={handleMouseLeave}
               >
-                {item.name}
-              </Link>
+                <Link
+                  to={item.path}
+                  className={`flex items-center px-4 py-2 text-sm font-medium transition-colors rounded ${
+                    item.isHighlighted
+                      ? "text-orange-400 hover:text-orange-300"
+                      : "text-white hover:text-orange-300"
+                  }`}
+                >
+                  {item.name}
+                  {item.hasDropdown && (
+                    <ChevronDown size={16} className="ml-1" />
+                  )}
+                </Link>
+
+                {/* Dropdown Menu */}
+                {item.hasDropdown && activeDropdown === item.name && (
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white text-gray-800 rounded-lg shadow-lg border z-50">
+                    <div className="py-2">
+                      {item.dropdownItems?.map((dropdownItem) => (
+                        <Link
+                          key={dropdownItem.name}
+                          to={dropdownItem.path}
+                          className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
+                        >
+                          {dropdownItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
-          {/* Right side actions */}
+          {/* Search and CTA */}
           <div className="flex items-center space-x-4">
+            {/* Search Bar */}
+            <div className="hidden lg:flex items-center bg-white/10 rounded-lg px-3 py-2 min-w-[250px]">
+              <Search size={18} className="text-white/70 mr-2" />
+              <Input
+                placeholder="Search"
+                className="bg-transparent border-none text-white placeholder:text-white/70 focus:ring-0 focus:outline-none"
+              />
+            </div>
+
+            {/* Book Consultation Button */}
             <Button
               onClick={onBookingClick}
               className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white"
             >
               Book Consultation
             </Button>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-gray-200">
-            <nav className="flex flex-col space-y-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="text-gray-700 hover:text-orange-500 font-medium transition-colors"
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <Button
-                onClick={() => {
-                  onBookingClick();
-                  setIsMenuOpen(false);
-                }}
-                className="bg-orange-500 hover:bg-orange-600 text-white w-full"
-              >
-                Book Consultation
-              </Button>
-            </nav>
-          </div>
-        )}
       </div>
     </header>
   );
