@@ -5,35 +5,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Lock, User } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Lock, User, Mail } from "lucide-react";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const AdminLogin = () => {
-  const [credentials, setCredentials] = useState({ username: "", password: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { signIn, isAuthenticated } = useAdminAuth();
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    navigate("/admin");
+    return null;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // For demo purposes - in production, this would validate against backend
-    if (credentials.username === "admin" && credentials.password === "admin123") {
-      localStorage.setItem("adminAuthenticated", "true");
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin panel",
-      });
+    try {
+      await signIn(credentials.email, credentials.password);
       navigate("/admin");
-    } else {
-      toast({
-        title: "Login Failed",
-        description: "Invalid credentials",
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Error is handled by useAdminAuth hook
+      console.error('Login error:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
@@ -43,21 +42,22 @@ const AdminLogin = () => {
           <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <Lock className="w-8 h-8 text-white" />
           </div>
-          <CardTitle className="text-2xl">Admin Login</CardTitle>
+          <CardTitle className="text-2xl">Admin Portal</CardTitle>
+          <p className="text-gray-600 text-sm">Sign in to access the admin dashboard</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="email">Email Address</Label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter username"
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
                   className="pl-10"
-                  value={credentials.username}
-                  onChange={(e) => setCredentials({...credentials, username: e.target.value})}
+                  value={credentials.email}
+                  onChange={(e) => setCredentials({...credentials, email: e.target.value})}
                   required
                 />
               </div>
@@ -69,7 +69,7 @@ const AdminLogin = () => {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter password"
+                  placeholder="Enter your password"
                   className="pl-10"
                   value={credentials.password}
                   onChange={(e) => setCredentials({...credentials, password: e.target.value})}
@@ -78,11 +78,16 @@ const AdminLogin = () => {
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Login"}
+              {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
-            Demo credentials: admin / admin123
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-800 mb-2">Setup Instructions:</h4>
+            <ol className="text-sm text-blue-700 space-y-1">
+              <li>1. Create a Supabase auth user with email: admin@kollegeapply.com</li>
+              <li>2. The user will automatically be linked to the admin role</li>
+              <li>3. Use those credentials to sign in</li>
+            </ol>
           </div>
         </CardContent>
       </Card>

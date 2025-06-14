@@ -1,53 +1,59 @@
 
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "@/components/ui/theme-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Colleges from "./pages/Colleges";
-import Exams from "./pages/Exams";
-import Courses from "./pages/Courses";
-import Articles from "./pages/Articles";
-import CollegeDetail from "./pages/CollegeDetail";
-import TNEAPredictor from "./pages/TNEAPredictor";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import AboutUs from "./pages/AboutUs";
-import ContactUs from "./pages/ContactUs";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="kollege-apply-theme">
+// Lazy load pages
+const Colleges = lazy(() => import("./pages/Colleges"));
+const CollegeDetail = lazy(() => import("./pages/CollegeDetail"));
+const TNEAPredictor = lazy(() => import("./pages/TNEAPredictor"));
+const AboutUs = lazy(() => import("./pages/AboutUs"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
+const Articles = lazy(() => import("./pages/Articles"));
+const Exams = lazy(() => import("./pages/Exams"));
+const Courses = lazy(() => import("./pages/Courses"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminUnauthorized = lazy(() => import("./pages/AdminUnauthorized"));
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/colleges" element={<Colleges />} />
-            <Route path="/exams" element={<Exams />} />
-            <Route path="/courses" element={<Courses />} />
-            <Route path="/articles" element={<Articles />} />
-            <Route path="/college/:id" element={<CollegeDetail />} />
-            <Route path="/tnea-predictor" element={<TNEAPredictor />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/contact-us" element={<ContactUs />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/colleges" element={<Colleges />} />
+              <Route path="/college/:slug" element={<CollegeDetail />} />
+              <Route path="/tnea-predictor" element={<TNEAPredictor />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/contact" element={<ContactUs />} />
+              <Route path="/articles" element={<Articles />} />
+              <Route path="/exams" element={<Exams />} />
+              <Route path="/courses" element={<Courses />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              
+              {/* Admin Routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/unauthorized" element={<AdminUnauthorized />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+    </QueryClientProvider>
+  );
+}
 
 export default App;

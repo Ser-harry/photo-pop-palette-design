@@ -1,4 +1,3 @@
-
 export interface DatabaseCollege {
   id: string;
   name: string;
@@ -92,5 +91,39 @@ export interface DatabasePageView {
   session_id?: string;
   device_type?: string;
   referrer?: string;
+  created_at: string;
+}
+
+export interface DatabaseAdminUser {
+  id: string;
+  user_id: string;
+  email: string;
+  role: 'super_admin' | 'admin' | 'moderator';
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_login: string | null;
+  created_by: string | null;
+}
+
+export interface DatabaseAdminSession {
+  id: string;
+  admin_user_id: string;
+  session_token: string;
+  expires_at: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+export interface DatabaseAdminActivityLog {
+  id: string;
+  admin_user_id: string;
+  action: string;
+  resource_type: string | null;
+  resource_id: string | null;
+  details: any;
+  ip_address: string | null;
+  user_agent: string | null;
   created_at: string;
 }
