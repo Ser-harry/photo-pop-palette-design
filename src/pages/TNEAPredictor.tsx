@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calculator, TrendingUp, Award, BookOpen, Filter, MapPin, Building, GraduationCap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,9 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { mockColleges, mockBranches, mockCutoffData, tamilNaduDistricts, categories } from "@/data/mockData";
-import { predictColleges } from "@/utils/predictionAlgorithm";
+import { useQuery } from "@tanstack/react-query";
+import { getColleges, getBranches, getCutoffData } from "@/services/collegeService";
+import { trackSearch, trackPageView } from "@/services/analyticsService";
+import { predictCollegesFromDatabase } from "@/utils/databasePredictionAlgorithm";
 import { PredictionFilters, CollegeWithCutoff } from "@/types/college";
+import { tamilNaduDistricts, categories } from "@/data/mockData";
 
 const TNEAPredictor = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -25,14 +27,52 @@ const TNEAPredictor = () => {
   const [predictions, setPredictions] = useState<CollegeWithCutoff[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
-  const handlePredict = () => {
+  // Track page view on component mount
+  useEffect(() => {
+    trackPageView({
+      page_path: '/tnea-predictor',
+      device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+      referrer: document.referrer
+    });
+  }, []);
+
+  // Fetch data from database
+  const { data: colleges = [], isLoading: collegesLoading } = useQuery({
+    queryKey: ['colleges'],
+    queryFn: getColleges,
+  });
+
+  const { data: branches = [], isLoading: branchesLoading } = useQuery({
+    queryKey: ['branches'],
+    queryFn: getBranches,
+  });
+
+  const { data: cutoffData = [], isLoading: cutoffLoading } = useQuery({
+    queryKey: ['cutoff-data'],
+    queryFn: getCutoffData,
+  });
+
+  const isLoading = collegesLoading || branchesLoading || cutoffLoading;
+
+  const handlePredict = async () => {
     if (!filters.marks || !filters.category) {
       alert("Please enter your marks and select category");
       return;
     }
 
-    const results = predictColleges(filters, mockColleges, mockBranches, mockCutoffData);
+    const results = predictCollegesFromDatabase(filters, colleges, branches, cutoffData);
     setPredictions(results);
+
+    // Track search analytics
+    await trackSearch({
+      marks: filters.marks,
+      category: filters.category,
+      preferred_district: filters.preferredDistrict,
+      college_types: filters.collegeType,
+      branches: filters.branches,
+      results_count: results.length,
+      session_id: `session_${Date.now()}`
+    });
   };
 
   const handleCollegeTypeChange = (type: string, checked: boolean) => {
@@ -77,7 +117,7 @@ const TNEAPredictor = () => {
           </p>
           <div className="flex justify-center space-x-8 text-center">
             <div>
-              <div className="text-3xl font-bold">600+</div>
+              <div className="text-3xl font-bold">{colleges.length}+</div>
               <div className="text-sm opacity-90">Engineering Colleges</div>
             </div>
             <div>
@@ -178,7 +218,7 @@ const TNEAPredictor = () => {
                     <div>
                       <label className="block text-sm font-medium mb-2">Preferred Branches</label>
                       <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {mockBranches.map((branch) => (
+                        {branches.map((branch) => (
                           <div key={branch.id} className="flex items-center space-x-2">
                             <Checkbox
                               id={branch.id}
@@ -199,8 +239,9 @@ const TNEAPredictor = () => {
                   onClick={handlePredict}
                   className="w-full bg-orange-500 hover:bg-orange-600"
                   size="lg"
+                  disabled={isLoading}
                 >
-                  Predict My Chances
+                  {isLoading ? "Loading..." : "Predict My Chances"}
                 </Button>
               </CardContent>
             </Card>

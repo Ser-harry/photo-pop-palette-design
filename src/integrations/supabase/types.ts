@@ -9,6 +9,54 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      advertisements: {
+        Row: {
+          clicks: number
+          created_at: string
+          cta_text: string
+          end_date: string
+          id: string
+          image_url: string
+          impressions: number
+          is_active: boolean
+          placement: string
+          start_date: string
+          target_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          cta_text: string
+          end_date: string
+          id?: string
+          image_url: string
+          impressions?: number
+          is_active?: boolean
+          placement: string
+          start_date: string
+          target_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          cta_text?: string
+          end_date?: string
+          id?: string
+          image_url?: string
+          impressions?: number
+          is_active?: boolean
+          placement?: string
+          start_date?: string
+          target_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       Billboard: {
         Row: {
           createdAt: string
@@ -33,6 +81,30 @@ export type Database = {
           label?: string
           storeId?: string
           updatedAt?: string
+        }
+        Relationships: []
+      }
+      branches: {
+        Row: {
+          code: string
+          created_at: string
+          duration: string
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          duration?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          duration?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -63,6 +135,54 @@ export type Database = {
         }
         Relationships: []
       }
+      colleges: {
+        Row: {
+          created_at: string
+          district: string
+          established: number | null
+          facilities: string[] | null
+          featured: boolean
+          id: string
+          location: string
+          naac_grade: string | null
+          name: string
+          slug: string
+          type: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          district: string
+          established?: number | null
+          facilities?: string[] | null
+          featured?: boolean
+          id?: string
+          location: string
+          naac_grade?: string | null
+          name: string
+          slug: string
+          type: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          district?: string
+          established?: number | null
+          facilities?: string[] | null
+          featured?: boolean
+          id?: string
+          location?: string
+          naac_grade?: string | null
+          name?: string
+          slug?: string
+          type?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       Color: {
         Row: {
           createdAt: string
@@ -89,6 +209,57 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      cutoff_data: {
+        Row: {
+          branch_id: string | null
+          category: string
+          closing_rank: number | null
+          college_id: string | null
+          created_at: string
+          cutoff_mark: number
+          id: string
+          opening_rank: number | null
+          year: number
+        }
+        Insert: {
+          branch_id?: string | null
+          category: string
+          closing_rank?: number | null
+          college_id?: string | null
+          created_at?: string
+          cutoff_mark: number
+          id?: string
+          opening_rank?: number | null
+          year: number
+        }
+        Update: {
+          branch_id?: string | null
+          category?: string
+          closing_rank?: number | null
+          college_id?: string | null
+          created_at?: string
+          cutoff_mark?: number
+          id?: string
+          opening_rank?: number | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cutoff_data_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cutoff_data_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "colleges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Image: {
         Row: {
@@ -162,6 +333,36 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          device_type: string | null
+          id: string
+          page_path: string
+          referrer: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          page_path: string
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          page_path?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       Product: {
         Row: {
           categoryId: string
@@ -201,6 +402,45 @@ export type Database = {
           sizeId?: string
           storeId?: string
           updatedAt?: string
+        }
+        Relationships: []
+      }
+      search_analytics: {
+        Row: {
+          branches: string[] | null
+          category: string
+          college_types: string[] | null
+          created_at: string
+          id: string
+          marks: number
+          preferred_district: string | null
+          results_count: number
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          branches?: string[] | null
+          category: string
+          college_types?: string[] | null
+          created_at?: string
+          id?: string
+          marks: number
+          preferred_district?: string | null
+          results_count?: number
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          branches?: string[] | null
+          category?: string
+          college_types?: string[] | null
+          created_at?: string
+          id?: string
+          marks?: number
+          preferred_district?: string | null
+          results_count?: number
+          session_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -252,6 +492,84 @@ export type Database = {
           name?: string
           updatedAt?: string
           userId?: string
+        }
+        Relationships: []
+      }
+      user_bookmarks: {
+        Row: {
+          branch_id: string | null
+          college_id: string | null
+          created_at: string
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          college_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          college_id?: string | null
+          created_at?: string
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_bookmarks_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_bookmarks_college_id_fkey"
+            columns: ["college_id"]
+            isOneToOne: false
+            referencedRelation: "colleges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          category: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          preferred_district: string | null
+          tnea_marks: number | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          preferred_district?: string | null
+          tnea_marks?: number | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          preferred_district?: string | null
+          tnea_marks?: number | null
+          updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
