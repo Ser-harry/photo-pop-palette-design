@@ -2,6 +2,7 @@
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
 const CollegeGrid = () => {
   const colleges = [
@@ -112,54 +113,56 @@ const CollegeGrid = () => {
         {/* College Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {colleges.map((college) => (
-            <Card key={college.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4 mb-4">
-                  <img
-                    src={college.logo}
-                    alt={college.name}
-                    className="w-16 h-16 rounded-full object-cover"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg leading-tight mb-1">
-                      {college.name}
-                    </h3>
-                    <p className="text-blue-600 text-sm">{college.location}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-gray-600">Established in</span>
-                    <p className="font-semibold">{college.established}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Tuition Fees</span>
-                    <p className="font-semibold">{college.fees}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">No. of Courses</span>
-                    <div className="flex items-center">
-                      <span className="font-semibold mr-2">{college.courses}</span>
-                      <div className="flex items-center">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="ml-1 text-sm">{college.rating}</span>
-                      </div>
+            <Link key={college.id} to={`/college/${college.id}`}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4 mb-4">
+                    <img
+                      src={college.logo}
+                      alt={college.name}
+                      className="w-16 h-16 rounded-full object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-lg leading-tight mb-1">
+                        {college.name}
+                      </h3>
+                      <p className="text-blue-600 text-sm">{college.location}</p>
                     </div>
                   </div>
-                  <div>
-                    <span className="text-gray-600">Ranking</span>
-                    <p className="font-semibold text-orange-500">{college.ranking}</p>
-                  </div>
-                </div>
 
-                <div className="mt-4">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                    {college.badge}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Established in</span>
+                      <p className="font-semibold">{college.established}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Tuition Fees</span>
+                      <p className="font-semibold">{college.fees}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">No. of Courses</span>
+                      <div className="flex items-center">
+                        <span className="font-semibold mr-2">{college.courses}</span>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span className="ml-1 text-sm">{college.rating}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Ranking</span>
+                      <p className="font-semibold text-orange-500">{college.ranking}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+                      {college.badge}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

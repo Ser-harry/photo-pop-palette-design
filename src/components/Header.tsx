@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Link, useLocation } from "react-router-dom";
 
 interface HeaderProps {
   onBookingClick: () => void;
@@ -10,17 +11,18 @@ interface HeaderProps {
 
 const Header = ({ onBookingClick }: HeaderProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   const navigationItems = [
-    { name: "Engineering", hasDropdown: true },
-    { name: "Management", hasDropdown: true },
-    { name: "Medical", hasDropdown: true },
-    { name: "Design", hasDropdown: true },
-    { name: "More", hasDropdown: true },
-    { name: "Online", hasDropdown: false, highlight: true },
-    { name: "Exams", hasDropdown: false },
-    { name: "Articles", hasDropdown: false },
-    { name: "Courses", hasDropdown: false },
+    { name: "Engineering", hasDropdown: true, path: "/courses" },
+    { name: "Management", hasDropdown: true, path: "/courses" },
+    { name: "Medical", hasDropdown: true, path: "/courses" },
+    { name: "Design", hasDropdown: true, path: "/courses" },
+    { name: "More", hasDropdown: true, path: "/courses" },
+    { name: "Online", hasDropdown: false, highlight: true, path: "/courses" },
+    { name: "Exams", hasDropdown: false, path: "/exams" },
+    { name: "Articles", hasDropdown: false, path: "/articles" },
+    { name: "Courses", hasDropdown: false, path: "/courses" },
   ];
 
   return (
@@ -28,20 +30,23 @@ const Header = ({ onBookingClick }: HeaderProps) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <Link to="/" className="flex items-center">
             <h1 className="text-2xl font-bold">
               Kollege<span className="text-orange-500">Apply</span>
             </h1>
             <span className="text-xs ml-2 opacity-75">Empowering Education</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-6">
             {navigationItems.map((item) => (
               <div key={item.name} className="relative group">
-                <button
+                <Link
+                  to={item.path}
                   className={`flex items-center space-x-1 px-3 py-2 rounded hover:bg-blue-800 transition-colors ${
                     item.highlight ? "bg-orange-500 hover:bg-orange-600" : ""
+                  } ${
+                    location.pathname === item.path ? "bg-blue-800" : ""
                   }`}
                 >
                   <span>{item.name}</span>
@@ -50,7 +55,7 @@ const Header = ({ onBookingClick }: HeaderProps) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   )}
-                </button>
+                </Link>
               </div>
             ))}
           </nav>
@@ -81,14 +86,18 @@ const Header = ({ onBookingClick }: HeaderProps) => {
           <div className="lg:hidden py-4 border-t border-blue-800">
             <nav className="space-y-2">
               {navigationItems.map((item) => (
-                <button
+                <Link
                   key={item.name}
+                  to={item.path}
                   className={`block w-full text-left px-3 py-2 rounded hover:bg-blue-800 transition-colors ${
                     item.highlight ? "bg-orange-500" : ""
+                  } ${
+                    location.pathname === item.path ? "bg-blue-800" : ""
                   }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
-                </button>
+                </Link>
               ))}
             </nav>
             <div className="mt-4">
