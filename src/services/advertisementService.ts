@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseAdvertisement } from "@/types/database";
 
@@ -48,6 +47,21 @@ export async function createAd(adData: {
   end_date: string;
   is_active: boolean;
 }): Promise<DatabaseAdvertisement> {
+  console.log('Creating advertisement with data:', adData);
+  
+  // Validate data before sending
+  if (!adData.title || !adData.image_url || !adData.target_url || !adData.cta_text) {
+    throw new Error('Missing required fields');
+  }
+  
+  if (!adData.start_date || !adData.end_date) {
+    throw new Error('Start date and end date are required');
+  }
+  
+  if (new Date(adData.start_date) > new Date(adData.end_date)) {
+    throw new Error('Start date cannot be after end date');
+  }
+
   const { data, error } = await supabase
     .from('advertisements')
     .insert([adData])
@@ -56,9 +70,16 @@ export async function createAd(adData: {
 
   if (error) {
     console.error('Error creating advertisement:', error);
+    console.error('Error details:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
     throw error;
   }
 
+  console.log('Advertisement created successfully:', data);
   return data as DatabaseAdvertisement;
 }
 

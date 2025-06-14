@@ -25,6 +25,34 @@ const AdForm = ({ ad, onSave, onCancel }: AdFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form data being submitted:', formData);
+    
+    // Basic validation
+    if (!formData.title.trim()) {
+      alert('Please enter a title');
+      return;
+    }
+    if (!formData.image_url.trim()) {
+      alert('Please enter an image URL');
+      return;
+    }
+    if (!formData.target_url.trim()) {
+      alert('Please enter a target URL');
+      return;
+    }
+    if (!formData.cta_text.trim()) {
+      alert('Please enter CTA text');
+      return;
+    }
+    if (!formData.start_date) {
+      alert('Please select a start date');
+      return;
+    }
+    if (!formData.end_date) {
+      alert('Please select an end date');
+      return;
+    }
+    
     onSave(formData);
   };
 
