@@ -210,31 +210,31 @@ const Colleges = () => {
             <div className="grid gap-6">
               {filteredColleges.map((college) => (
                 <Link key={college.id} to={`/college/${college.slug}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer relative">
-                    {college.featured && (
-                      <Badge className="absolute top-3 right-3 bg-orange-500 text-white hover:bg-orange-600 z-10">
-                        Featured
-                      </Badge>
-                    )}
-                    <CardContent className="p-6">
+                  <Card className="hover:shadow-lg transition-shadow cursor-pointer relative overflow-hidden">
+                    <CardContent className={`p-6 ${college.featured ? 'pt-12' : ''}`}>
+                      {college.featured && (
+                        <Badge className="absolute top-2 left-2 bg-orange-500 text-white hover:bg-orange-600 z-10 text-xs px-2 py-1">
+                          Featured
+                        </Badge>
+                      )}
                       <div className="flex items-start space-x-4">
                         <img
                           src="https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=100&h=100&fit=crop"
                           alt={college.name}
-                          className="w-20 h-20 rounded-lg object-cover"
+                          className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-semibold text-xl mb-1">
+                            <div className="flex-1 min-w-0 pr-4">
+                              <h3 className="font-semibold text-xl mb-1 truncate">
                                 {college.name}
                               </h3>
                               <p className="text-blue-600 flex items-center">
-                                <MapPin className="w-4 h-4 mr-1" />
-                                {college.location}
+                                <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+                                <span className="truncate">{college.location}</span>
                               </p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right flex-shrink-0">
                               <div className="flex items-center mb-1">
                                 <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
                                 <span className="font-semibold">4.5</span>
