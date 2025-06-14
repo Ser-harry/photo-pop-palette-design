@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
@@ -11,6 +11,7 @@ interface HeaderProps {
 
 const Header = ({ onBookingClick }: HeaderProps) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -81,82 +82,135 @@ const Header = ({ onBookingClick }: HeaderProps) => {
   };
 
   return (
-    <header className="bg-slate-800 text-white sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex justify-between items-center py-3">
+        <div className="flex justify-between items-center py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded flex items-center justify-center">
               <span className="text-white font-bold text-sm">K</span>
             </div>
-            <span className="text-xl font-bold text-white">
+            <span className="text-xl font-bold text-gray-900">
               Kollege<span className="text-orange-500">Apply</span>
             </span>
           </Link>
 
-          {/* Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
-            {navItems.map((item) => (
-              <div
-                key={item.name}
-                className="relative"
-                onMouseEnter={() => item.hasDropdown && handleMouseEnter(item.name)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <Link
-                  to={item.path}
-                  className={`flex items-center px-4 py-2 text-sm font-medium transition-colors rounded ${
-                    item.isHighlighted
-                      ? "text-orange-400 hover:text-orange-300"
-                      : "text-white hover:text-orange-300"
-                  }`}
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center justify-center flex-1 mx-8">
+            <div className="flex items-center space-x-1">
+              {navItems.map((item) => (
+                <div
+                  key={item.name}
+                  className="relative"
+                  onMouseEnter={() => item.hasDropdown && handleMouseEnter(item.name)}
+                  onMouseLeave={handleMouseLeave}
                 >
-                  {item.name}
-                  {item.hasDropdown && (
-                    <ChevronDown size={16} className="ml-1" />
-                  )}
-                </Link>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center px-4 py-2 text-sm font-medium transition-colors rounded-md ${
+                      item.isHighlighted
+                        ? "text-orange-500 hover:text-orange-600 hover:bg-orange-50"
+                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                    }`}
+                  >
+                    {item.name}
+                    {item.hasDropdown && (
+                      <ChevronDown size={16} className="ml-1" />
+                    )}
+                  </Link>
 
-                {/* Dropdown Menu */}
-                {item.hasDropdown && activeDropdown === item.name && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white text-gray-800 rounded-lg shadow-lg border z-50">
-                    <div className="py-2">
-                      {item.dropdownItems?.map((dropdownItem) => (
-                        <Link
-                          key={dropdownItem.name}
-                          to={dropdownItem.path}
-                          className="block px-4 py-2 text-sm hover:bg-gray-100 transition-colors"
-                        >
-                          {dropdownItem.name}
-                        </Link>
-                      ))}
+                  {/* Dropdown Menu */}
+                  {item.hasDropdown && activeDropdown === item.name && (
+                    <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="py-2">
+                        {item.dropdownItems?.map((dropdownItem) => (
+                          <Link
+                            key={dropdownItem.name}
+                            to={dropdownItem.path}
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                          >
+                            {dropdownItem.name}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
+            </div>
           </nav>
 
           {/* Search and CTA */}
           <div className="flex items-center space-x-4">
             {/* Search Bar */}
-            <div className="hidden lg:flex items-center bg-white/10 rounded-lg px-3 py-2 min-w-[250px]">
-              <Search size={18} className="text-white/70 mr-2" />
+            <div className="hidden lg:flex items-center bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
+              <Search size={18} className="text-gray-500 mr-2" />
               <Input
-                placeholder="Search"
-                className="bg-transparent border-none text-white placeholder:text-white/70 focus:ring-0 focus:outline-none"
+                placeholder="Search colleges, courses..."
+                className="bg-transparent border-none text-gray-700 placeholder:text-gray-500 focus:ring-0 focus:outline-none"
               />
             </div>
 
             {/* Book Consultation Button */}
             <Button
               onClick={onBookingClick}
-              className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white"
+              className="hidden lg:flex bg-orange-500 hover:bg-orange-600 text-white px-6"
             >
               Book Consultation
             </Button>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 py-4">
+            <div className="space-y-2">
+              {/* Mobile Search */}
+              <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-4">
+                <Search size={18} className="text-gray-500 mr-2" />
+                <Input
+                  placeholder="Search colleges, courses..."
+                  className="bg-transparent border-none text-gray-700 placeholder:text-gray-500 focus:ring-0 focus:outline-none"
+                />
+              </div>
+
+              {/* Mobile Navigation */}
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    item.isHighlighted
+                      ? "text-orange-500 hover:bg-orange-50"
+                      : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+
+              {/* Mobile CTA */}
+              <Button
+                onClick={() => {
+                  onBookingClick();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                Book Consultation
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );
