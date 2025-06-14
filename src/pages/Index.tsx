@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Search } from "lucide-react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
+import NavigationSection from "@/components/NavigationSection";
 import StatsSection from "@/components/StatsSection";
 import CollegeGrid from "@/components/CollegeGrid";
 import NewsSection from "@/components/NewsSection";
@@ -19,8 +19,9 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header onBookingClick={() => setIsBookingModalOpen(true)} />
       <HeroSection />
+      <NavigationSection />
       
-      {/* Advertisement after hero section */}
+      {/* Advertisement after navigation section */}
       <div className="py-4">
         <div className="max-w-7xl mx-auto px-4">
           <Advertisement placement="home" className="max-w-4xl mx-auto" />
