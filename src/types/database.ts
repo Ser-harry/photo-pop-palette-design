@@ -5,7 +5,7 @@ export interface DatabaseCollege {
   slug: string;
   location: string;
   district: string;
-  type: "government" | "aided" | "self-financing";
+  type: string; // Changed from union type to string for database compatibility
   naac_grade?: string;
   established: number;
   website?: string;
@@ -41,7 +41,7 @@ export interface DatabaseAdvertisement {
   image_url: string;
   target_url: string;
   cta_text: string;
-  placement: "home" | "results" | "sidebar";
+  placement: string; // Changed from union type to string for database compatibility
   start_date: string;
   end_date: string;
   is_active: boolean;

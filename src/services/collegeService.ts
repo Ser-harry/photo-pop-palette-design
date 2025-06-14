@@ -14,7 +14,7 @@ export async function getColleges(): Promise<DatabaseCollege[]> {
     throw error;
   }
 
-  return data || [];
+  return (data || []) as DatabaseCollege[];
 }
 
 export async function getFeaturedColleges(): Promise<DatabaseCollege[]> {
@@ -29,7 +29,7 @@ export async function getFeaturedColleges(): Promise<DatabaseCollege[]> {
     throw error;
   }
 
-  return data || [];
+  return (data || []) as DatabaseCollege[];
 }
 
 export async function getCollegeBySlug(slug: string): Promise<DatabaseCollege | null> {
@@ -44,7 +44,7 @@ export async function getCollegeBySlug(slug: string): Promise<DatabaseCollege | 
     return null;
   }
 
-  return data;
+  return data as DatabaseCollege;
 }
 
 export async function getBranches(): Promise<DatabaseBranch[]> {

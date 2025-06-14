@@ -21,12 +21,15 @@ export async function getActiveAds(placement?: string): Promise<DatabaseAdvertis
     throw error;
   }
 
-  return data || [];
+  return (data || []) as DatabaseAdvertisement[];
 }
 
 export async function trackAdImpression(adId: string): Promise<void> {
   try {
-    const { error } = await supabase.rpc('increment_ad_impressions', { ad_id: adId });
+    const { error } = await supabase
+      .from('advertisements')
+      .update({ impressions: supabase.sql`impressions + 1` })
+      .eq('id', adId);
     
     if (error) {
       console.error('Error tracking ad impression:', error);
@@ -38,7 +41,10 @@ export async function trackAdImpression(adId: string): Promise<void> {
 
 export async function trackAdClick(adId: string): Promise<void> {
   try {
-    const { error } = await supabase.rpc('increment_ad_clicks', { ad_id: adId });
+    const { error } = await supabase
+      .from('advertisements')
+      .update({ clicks: supabase.sql`clicks + 1` })
+      .eq('id', adId);
     
     if (error) {
       console.error('Error tracking ad click:', error);
