@@ -1,70 +1,32 @@
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import CollegeDetailsTable from "@/components/colleges/CollegeDetailsTable";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-
-// Sample data - replace with actual data from your database
-const sampleColleges = [
-  {
-    id: "1",
-    name: "Indian Institute of Technology Madras",
-    principalName: "Dr. V. Kamakoti",
-    address: "Chennai, Tamil Nadu 600036",
-    email: "director@iitm.ac.in",
-    website: "www.iitm.ac.in",
-    phone: "+91-44-2257-4802"
-  },
-  {
-    id: "2",
-    name: "National Institute of Technology Tiruchirappalli",
-    principalName: "Dr. G. Aghila",
-    address: "Tiruchirappalli, Tamil Nadu 620015",
-    email: "director@nitt.edu",
-    website: "www.nitt.edu",
-    phone: "+91-431-250-3000"
-  },
-  {
-    id: "3",
-    name: "Anna University",
-    principalName: "Dr. R. Velraj",
-    address: "Chennai, Tamil Nadu 600025",
-    email: "registrar@annauniv.edu",
-    website: "www.annauniv.edu",
-    phone: "+91-44-2235-8346"
-  },
-  {
-    id: "4",
-    name: "PSG College of Technology",
-    principalName: "Dr. R. Rudramoorthy",
-    address: "Coimbatore, Tamil Nadu 641004",
-    email: "principal@psgtech.edu",
-    website: "www.psgtech.edu",
-    phone: "+91-422-257-2177"
-  },
-  {
-    id: "5",
-    name: "SSN College of Engineering",
-    principalName: "Dr. S. Salivahanan",
-    address: "Chennai, Tamil Nadu 603110",
-    email: "principal@ssn.edu.in",
-    website: "www.ssn.edu.in",
-    phone: "+91-44-2745-7710"
-  }
-];
+import { getCollegeDirectory } from "@/services/collegeDirectoryService";
 
 const CollegeDetailsDirectory = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   
-  const filteredColleges = sampleColleges.filter(college =>
+  const { data: colleges = [], isLoading, error } = useQuery({
+    queryKey: ['college-directory'],
+    queryFn: getCollegeDirectory
+  });
+  
+  const filteredColleges = colleges.filter(college =>
     college.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    college.principalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    college.address.toLowerCase().includes(searchTerm.toLowerCase())
+    (college.principalName && college.principalName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (college.address && college.address.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  if (error) {
+    console.error('Error loading college directory:', error);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,13 +55,31 @@ const CollegeDetailsDirectory = () => {
           </div>
         </div>
 
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-gray-500">Loading college directory...</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-red-500">Failed to load college directory. Please try again.</div>
+          </div>
+        )}
+
         {/* College Details Table */}
-        <CollegeDetailsTable colleges={filteredColleges} />
-        
-        {/* Statistics */}
-        <div className="mt-8 text-center text-gray-600">
-          <p>Showing {filteredColleges.length} of {sampleColleges.length} colleges</p>
-        </div>
+        {!isLoading && !error && (
+          <>
+            <CollegeDetailsTable colleges={filteredColleges} />
+            
+            {/* Statistics */}
+            <div className="mt-8 text-center text-gray-600">
+              <p>Showing {filteredColleges.length} of {colleges.length} colleges</p>
+            </div>
+          </>
+        )}
       </div>
 
       <Footer />

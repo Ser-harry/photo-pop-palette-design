@@ -29,6 +29,7 @@ const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminUnauthorized = lazy(() => import("./pages/AdminUnauthorized"));
 const Auth = lazy(() => import("./pages/Auth"));
+const DataImport = lazy(() => import("./pages/DataImport"));
 
 function AppContent() {
   return (
@@ -51,6 +52,7 @@ function AppContent() {
                 <Route path="/exams" element={<Exams />} />
                 <Route path="/courses" element={<Courses />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/data-import" element={<DataImport />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />

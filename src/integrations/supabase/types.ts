@@ -263,8 +263,10 @@ export type Database = {
       }
       colleges: {
         Row: {
+          address: string | null
           created_at: string
           district: string
+          email: string | null
           established: number | null
           facilities: string[] | null
           featured: boolean
@@ -272,14 +274,18 @@ export type Database = {
           location: string
           naac_grade: string | null
           name: string
+          phone: string | null
+          principal_name: string | null
           slug: string
           type: string
           updated_at: string
           website: string | null
         }
         Insert: {
+          address?: string | null
           created_at?: string
           district: string
+          email?: string | null
           established?: number | null
           facilities?: string[] | null
           featured?: boolean
@@ -287,14 +293,18 @@ export type Database = {
           location: string
           naac_grade?: string | null
           name: string
+          phone?: string | null
+          principal_name?: string | null
           slug: string
           type: string
           updated_at?: string
           website?: string | null
         }
         Update: {
+          address?: string | null
           created_at?: string
           district?: string
+          email?: string | null
           established?: number | null
           facilities?: string[] | null
           featured?: boolean
@@ -302,6 +312,8 @@ export type Database = {
           location?: string
           naac_grade?: string | null
           name?: string
+          phone?: string | null
+          principal_name?: string | null
           slug?: string
           type?: string
           updated_at?: string
@@ -621,6 +633,60 @@ export type Database = {
         }
         Relationships: []
       }
+      temp_cutoff_import: {
+        Row: {
+          bc: number | null
+          bcm: number | null
+          branch_code: string | null
+          branch_name: string | null
+          college_name: string | null
+          id: number
+          mbc: number | null
+          mbcdnc: number | null
+          mbcv: number | null
+          oc: number | null
+          processed: boolean | null
+          sc: number | null
+          sca: number | null
+          st: number | null
+          year: number | null
+        }
+        Insert: {
+          bc?: number | null
+          bcm?: number | null
+          branch_code?: string | null
+          branch_name?: string | null
+          college_name?: string | null
+          id?: number
+          mbc?: number | null
+          mbcdnc?: number | null
+          mbcv?: number | null
+          oc?: number | null
+          processed?: boolean | null
+          sc?: number | null
+          sca?: number | null
+          st?: number | null
+          year?: number | null
+        }
+        Update: {
+          bc?: number | null
+          bcm?: number | null
+          branch_code?: string | null
+          branch_name?: string | null
+          college_name?: string | null
+          id?: number
+          mbc?: number | null
+          mbcdnc?: number | null
+          mbcv?: number | null
+          oc?: number | null
+          processed?: boolean | null
+          sc?: number | null
+          sca?: number | null
+          st?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       user_bookmarks: {
         Row: {
           branch_id: string | null
@@ -711,6 +777,10 @@ export type Database = {
       is_admin_user: {
         Args: { user_id: string }
         Returns: boolean
+      }
+      process_cutoff_import: {
+        Args: { import_year?: number }
+        Returns: number
       }
     }
     Enums: {
