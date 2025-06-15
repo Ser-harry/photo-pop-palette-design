@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExternalLink, Mail, Phone, MapPin } from "lucide-react";
@@ -7,11 +6,11 @@ import { Button } from "@/components/ui/button";
 interface CollegeDetailsData {
   id: string;
   name: string;
-  principalName: string;
-  address: string;
-  email: string;
-  website: string;
-  phone: string;
+  principalName?: string;
+  address?: string;
+  email?: string;
+  website?: string;
+  phone?: string;
 }
 
 interface CollegeDetailsTableProps {
