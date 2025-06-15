@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Send, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@/hooks/useSession";
+import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
@@ -24,8 +25,21 @@ export default function Chatbot() {
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Use the custom hook for session (returns { sessionId, deviceType })
+  // Use both Clerk user context and session
+  const { user, isSignedIn } = useUser();
   const { sessionId } = useSession();
+
+  // Update greeting message when user signs in
+  useEffect(() => {
+    if (isSignedIn && user?.firstName) {
+      setMessages([
+        {
+          sender: "bot",
+          text: `Hello ${user.firstName}! Ask me anything about colleges or general queries.`,
+        },
+      ]);
+    }
+  }, [isSignedIn, user?.firstName]);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -46,7 +60,9 @@ export default function Chatbot() {
       const { data, error } = await supabase.functions.invoke('answer-query', {
         body: { 
           query: content,
-          sessionId: sessionId 
+          sessionId: sessionId,
+          userId: user?.id || null,
+          userFirstName: user?.firstName || null
         },
       });
 
@@ -78,11 +94,10 @@ export default function Chatbot() {
     }
   };
 
-  // Since this project doesn't have user authentication, allow all users to chat
-  // If you want to restrict access, you'll need to implement proper authentication
-  const isAuthenticated = !!sessionId; // Anyone with a session can chat
+  // Allow all users to chat (both authenticated and anonymous)
+  const canChat = !!sessionId;
 
-  if (!isAuthenticated) {
+  if (!canChat) {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-40">
         <MessageCircle className="mb-2 text-orange-500" size={32} />
@@ -137,7 +152,11 @@ export default function Chatbot() {
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about colleges..."
+          placeholder={
+            isSignedIn 
+              ? "Ask about colleges..." 
+              : "Ask about colleges... (Sign in for personalized help)"
+          }
           className="flex-1 text-sm"
           disabled={loading}
           minLength={1}

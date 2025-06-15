@@ -1,9 +1,16 @@
-
 import { useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
+import { useUser, useClerk, SignedIn, SignedOut } from "@clerk/clerk-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   onBookingClick: () => void;
@@ -11,6 +18,8 @@ interface HeaderProps {
 
 const Header = ({ onBookingClick }: HeaderProps) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { user } = useUser();
+  const { signOut } = useClerk();
 
   const navItems = [
     {
@@ -78,6 +87,10 @@ const Header = ({ onBookingClick }: HeaderProps) => {
 
   const handleMouseLeave = () => {
     setActiveDropdown(null);
+  };
+
+  const handleSignOut = () => {
+    signOut();
   };
 
   return (
@@ -150,13 +163,45 @@ const Header = ({ onBookingClick }: HeaderProps) => {
               />
             </div>
 
-            {/* Book Consultation Button */}
-            <Button
-              onClick={onBookingClick}
-              className="bg-orange-500 hover:bg-orange-600 text-white px-6"
-            >
-              Book Consultation
-            </Button>
+            {/* Authentication Section */}
+            <SignedOut>
+              <Link to="/auth">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6">
+                  Sign In
+                </Button>
+              </Link>
+            </SignedOut>
+
+            <SignedIn>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center space-x-2 px-3">
+                    <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                      <User size={16} className="text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">
+                      {user?.firstName || 'User'}
+                    </span>
+                    <ChevronDown size={16} className="text-gray-500" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem>
+                    <span className="text-sm text-gray-600">
+                      {user?.emailAddresses[0]?.emailAddress}
+                    </span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onBookingClick}>
+                    Book Consultation
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SignedIn>
           </div>
         </div>
       </div>

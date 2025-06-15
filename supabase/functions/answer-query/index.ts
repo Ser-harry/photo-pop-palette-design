@@ -16,13 +16,32 @@ serve(async (req) => {
   }
 
   try {
-    const { query, sessionId } = await req.json();
+    const { query, sessionId, userId, userFirstName } = await req.json();
 
     if (!query) {
       throw new Error('Query is required');
     }
 
-    console.log(`Processing query for session ${sessionId}: ${query}`);
+    console.log(`Processing query for session ${sessionId}, user ${userId || 'anonymous'}: ${query}`);
+
+    // Create personalized system message
+    const systemMessage = userId && userFirstName
+      ? `You are a helpful college assistant chatbot for ${userFirstName}. You help students with:
+        - College admissions information
+        - Course and program details
+        - General academic guidance
+        - TNEA (Tamil Nadu Engineering Admissions) related queries
+        - College comparisons and recommendations
+        
+        Address the user by their first name (${userFirstName}) when appropriate. Keep your responses helpful, concise, and student-friendly. If you don't know specific information about a college or program, suggest the user contact the institution directly or check their official website.`
+      : `You are a helpful college assistant chatbot. You help students with:
+        - College admissions information
+        - Course and program details
+        - General academic guidance
+        - TNEA (Tamil Nadu Engineering Admissions) related queries
+        - College comparisons and recommendations
+        
+        Keep your responses helpful, concise, and student-friendly. If you don't know specific information about a college or program, suggest the user contact the institution directly or check their official website. Consider suggesting the user sign in for a more personalized experience.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -35,14 +54,7 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are a helpful college assistant chatbot. You help students with:
-            - College admissions information
-            - Course and program details
-            - General academic guidance
-            - TNEA (Tamil Nadu Engineering Admissions) related queries
-            - College comparisons and recommendations
-            
-            Keep your responses helpful, concise, and student-friendly. If you don't know specific information about a college or program, suggest the user contact the institution directly or check their official website.`
+            content: systemMessage
           },
           {
             role: 'user',
