@@ -18,6 +18,7 @@ interface HeroContentData {
   title: string;
   subtitle: string;
   background_image: string;
+  [key: string]: any; // Add index signature for Json compatibility
 }
 
 interface CollegeSectionUpdate {
