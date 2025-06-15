@@ -1,11 +1,10 @@
+
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, Send, User } from "lucide-react";
-// import { useUser } from "@supabase/auth-helpers-react"; // REMOVE this import
 import { useToast } from "@/hooks/use-toast";
-// Use the project-provided session hook
 import { useSession } from "@/hooks/useSession";
 
 interface Message {
@@ -25,8 +24,8 @@ export default function Chatbot() {
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
-  // Use the custom hook for user session (assume it returns { user })
-  const { user } = useSession() || {};
+  // Use the custom hook for session (returns { sessionId, deviceType })
+  const { sessionId } = useSession();
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -47,9 +46,12 @@ export default function Chatbot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // You can attach the user id or token if needed here
+          // You can attach the session id if needed here
         },
-        body: JSON.stringify({ query: content }),
+        body: JSON.stringify({ 
+          query: content,
+          sessionId: sessionId 
+        }),
       });
       if (!res.ok) throw new Error("No response from bot.");
       const data = await res.json();
@@ -72,18 +74,16 @@ export default function Chatbot() {
     }
   };
 
-  if (!user) {
+  // Since this project doesn't have user authentication, allow all users to chat
+  // If you want to restrict access, you'll need to implement proper authentication
+  const isAuthenticated = !!sessionId; // Anyone with a session can chat
+
+  if (!isAuthenticated) {
     return (
       <div className="p-6 flex flex-col items-center justify-center min-h-80">
         <MessageCircle className="mb-2 text-orange-500" size={40} />
-        <div className="text-lg mb-2 font-medium">Sign in to chat with the bot</div>
-        <a
-          href="/auth"
-          className="mt-2 px-4 py-2 bg-orange-400 text-white rounded shadow hover:bg-orange-500 transition"
-        >
-          Sign in
-        </a>
-        <p className="mt-4 text-sm text-gray-500">Chatting is available only for signed-in users.</p>
+        <div className="text-lg mb-2 font-medium">Loading session...</div>
+        <p className="mt-4 text-sm text-gray-500">Please wait while we initialize your session.</p>
       </div>
     );
   }
