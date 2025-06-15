@@ -3,15 +3,16 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload } from "lucide-react";
+import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload, Home, Database } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import CollegeManagement from "@/components/admin/CollegeManagement";
+import EnhancedCollegeManagement from "@/components/admin/EnhancedCollegeManagement";
 import AdManagement from "@/components/admin/AdManagement";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SearchTrends from "@/components/admin/SearchTrends";
 import ArticleManagement from "@/components/admin/ArticleManagement";
 import DataImportWithSchema from "@/components/admin/DataImportWithSchema";
+import HomepageContentManagement from "@/components/admin/HomepageContentManagement";
 
 const AdminDashboard = () => {
   const { signOut, adminUser } = useAdminAuth();
@@ -54,7 +55,7 @@ const AdminDashboard = () => {
           <div className="max-w-7xl mx-auto px-4 py-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Content Management System</h1>
                 {adminUser && (
                   <div className="flex items-center space-x-2">
                     <Badge className={`flex items-center space-x-1 ${getRoleColor(adminUser.role)}`}>
@@ -77,7 +78,7 @@ const AdminDashboard = () => {
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="colleges" className="flex items-center space-x-2">
                 <GraduationCap className="w-4 h-4" />
                 <span>Colleges</span>
@@ -85,6 +86,10 @@ const AdminDashboard = () => {
               <TabsTrigger value="articles" className="flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
                 <span>Articles</span>
+              </TabsTrigger>
+              <TabsTrigger value="homepage" className="flex items-center space-x-2">
+                <Home className="w-4 h-4" />
+                <span>Homepage</span>
               </TabsTrigger>
               <TabsTrigger value="ads" className="flex items-center space-x-2">
                 <ImageIcon className="w-4 h-4" />
@@ -105,11 +110,15 @@ const AdminDashboard = () => {
             </TabsList>
 
             <TabsContent value="colleges">
-              <CollegeManagement />
+              <EnhancedCollegeManagement />
             </TabsContent>
 
             <TabsContent value="articles">
               <ArticleManagement />
+            </TabsContent>
+
+            <TabsContent value="homepage">
+              <HomepageContentManagement />
             </TabsContent>
 
             <TabsContent value="ads">

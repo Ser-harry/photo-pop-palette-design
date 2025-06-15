@@ -215,6 +215,7 @@ export type Database = {
       }
       articles: {
         Row: {
+          article_label: string | null
           author_id: string
           category_id: string | null
           content: string
@@ -233,6 +234,7 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          article_label?: string | null
           author_id: string
           category_id?: string | null
           content: string
@@ -251,6 +253,7 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          article_label?: string | null
           author_id?: string
           category_id?: string | null
           content?: string
@@ -367,12 +370,15 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          display_order: number | null
           district: string
           email: string | null
           established: number | null
           facilities: string[] | null
           featured: boolean
+          homepage_featured: boolean
           id: string
+          image_url: string | null
           location: string
           naac_grade: string | null
           name: string
@@ -386,12 +392,15 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          display_order?: number | null
           district: string
           email?: string | null
           established?: number | null
           facilities?: string[] | null
           featured?: boolean
+          homepage_featured?: boolean
           id?: string
+          image_url?: string | null
           location: string
           naac_grade?: string | null
           name: string
@@ -405,12 +414,15 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          display_order?: number | null
           district?: string
           email?: string | null
           established?: number | null
           facilities?: string[] | null
           featured?: boolean
+          homepage_featured?: boolean
           id?: string
+          image_url?: string | null
           location?: string
           naac_grade?: string | null
           name?: string
@@ -500,6 +512,74 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      homepage_articles: {
+        Row: {
+          article_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          position: number
+          section: string
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position: number
+          section?: string
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          position?: number
+          section?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homepage_articles_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homepage_content: {
+        Row: {
+          content: Json
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          section_name: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          section_name: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          section_name?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       Image: {
         Row: {

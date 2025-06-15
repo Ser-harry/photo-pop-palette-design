@@ -29,6 +29,7 @@ export async function getFeaturedColleges(): Promise<DatabaseCollege[]> {
       .from('colleges')
       .select('*')
       .eq('featured', true)
+      .order('display_order')
       .order('name');
 
     if (error) {
@@ -39,6 +40,27 @@ export async function getFeaturedColleges(): Promise<DatabaseCollege[]> {
     return (data || []) as DatabaseCollege[];
   } catch (error) {
     console.error('Service error in getFeaturedColleges:', error);
+    throw error;
+  }
+}
+
+export async function getHomepageFeaturedColleges(): Promise<DatabaseCollege[]> {
+  try {
+    const { data, error } = await supabase
+      .from('colleges')
+      .select('*')
+      .eq('homepage_featured', true)
+      .order('display_order')
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching homepage featured colleges:', error);
+      throw new Error('Failed to fetch homepage featured colleges');
+    }
+
+    return (data || []) as DatabaseCollege[];
+  } catch (error) {
+    console.error('Service error in getHomepageFeaturedColleges:', error);
     throw error;
   }
 }

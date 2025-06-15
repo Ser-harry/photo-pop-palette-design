@@ -1,3 +1,4 @@
+
 export interface DatabaseCollege {
   id: string;
   name: string;
@@ -10,6 +11,13 @@ export interface DatabaseCollege {
   website?: string;
   facilities: string[];
   featured: boolean;
+  homepage_featured: boolean;
+  display_order: number;
+  image_url?: string;
+  principal_name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
   created_at: string;
   updated_at: string;
 }
@@ -125,5 +133,45 @@ export interface DatabaseAdminActivityLog {
   details: any;
   ip_address: string | null;
   user_agent: string | null;
+  created_at: string;
+}
+
+export interface DatabaseArticle {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  category_id?: string;
+  tags?: string[];
+  status: string;
+  featured: boolean;
+  featured_image?: string;
+  meta_description?: string;
+  article_label?: string;
+  author_id: string;
+  views: number;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatabaseHomepageContent {
+  id: string;
+  section_name: string;
+  title: string;
+  content: any;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DatabaseHomepageArticle {
+  id: string;
+  article_id: string;
+  position: number;
+  section: string;
+  is_active: boolean;
   created_at: string;
 }

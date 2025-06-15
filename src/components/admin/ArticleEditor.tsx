@@ -25,7 +25,8 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
     status: "draft",
     featured: false,
     featured_image: "",
-    meta_description: ""
+    meta_description: "",
+    article_label: ""
   });
   const [newTag, setNewTag] = useState("");
   const { toast } = useToast();
@@ -44,7 +45,8 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
         status: article.status || "draft",
         featured: article.featured || false,
         featured_image: article.featured_image || "",
-        meta_description: article.meta_description || ""
+        meta_description: article.meta_description || "",
+        article_label: article.article_label || ""
       });
     }
   }, [article]);
@@ -94,6 +96,7 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
       featured: boolean;
       featured_image: string;
       meta_description: string;
+      article_label: string;
       author_id: string;
       published_at?: string;
     }) => {
@@ -223,6 +226,19 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="article_label">Article Label/Badge</Label>
+            <Input
+              id="article_label"
+              value={formData.article_label}
+              onChange={(e) => setFormData(prev => ({ ...prev, article_label: e.target.value }))}
+              placeholder="e.g., Top Trending News!!!, Breaking News, etc."
+            />
+            <p className="text-sm text-gray-500 mt-1">
+              This label will appear as a badge on the article (optional)
+            </p>
           </div>
 
           <div>
