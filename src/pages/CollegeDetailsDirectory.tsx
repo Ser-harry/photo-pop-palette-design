@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import CollegeDetailsTable from "@/components/colleges/CollegeDetailsTable";
+import Advertisement from "@/components/Advertisement";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { getCollegeDirectory } from "@/services/collegeDirectoryService";
@@ -55,6 +56,11 @@ const CollegeDetailsDirectory = () => {
           </div>
         </div>
 
+        {/* Advertisement Banner */}
+        <div className="mb-8">
+          <Advertisement placement="results" className="max-w-full" />
+        </div>
+
         {/* Loading State */}
         {isLoading && (
           <div className="flex items-center justify-center py-8">
@@ -69,16 +75,24 @@ const CollegeDetailsDirectory = () => {
           </div>
         )}
 
-        {/* College Details Table */}
+        {/* Main Content with Sidebar */}
         {!isLoading && !error && (
-          <>
-            <CollegeDetailsTable colleges={filteredColleges} />
-            
-            {/* Statistics */}
-            <div className="mt-8 text-center text-gray-600">
-              <p>Showing {filteredColleges.length} of {colleges.length} colleges</p>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-3">
+              <CollegeDetailsTable colleges={filteredColleges} />
+              
+              {/* Statistics */}
+              <div className="mt-8 text-center text-gray-600">
+                <p>Showing {filteredColleges.length} of {colleges.length} colleges</p>
+              </div>
             </div>
-          </>
+
+            {/* Sidebar Ads */}
+            <div className="lg:col-span-1">
+              <Advertisement placement="sidebar" />
+            </div>
+          </div>
         )}
       </div>
 

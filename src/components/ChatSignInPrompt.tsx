@@ -60,7 +60,7 @@ const ChatSignInPrompt = () => {
       </Button>
 
       <p className="text-xs text-gray-500">
-        New to KollegeApply? Signing in will create your account automatically.
+        New to CollegeSera? Signing in will create your account automatically.
       </p>
     </div>
   );

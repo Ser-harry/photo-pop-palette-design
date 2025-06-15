@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -29,7 +28,7 @@ const Footer = () => {
             {/* Logo and Description */}
             <div className="md:col-span-1">
               <h2 className="text-2xl font-bold mb-4">
-                Kollege<span className="text-orange-500">Apply</span>
+                College<span className="text-orange-500">Sera</span>
               </h2>
               <p className="text-sm opacity-75 mb-4">Empowering Education</p>
               <p className="text-gray-400 text-sm mb-6">

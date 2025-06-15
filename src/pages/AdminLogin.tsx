@@ -84,7 +84,7 @@ const AdminLogin = () => {
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium text-blue-800 mb-2">Setup Instructions:</h4>
             <ol className="text-sm text-blue-700 space-y-1">
-              <li>1. Create a Supabase auth user with email: admin@kollegeapply.com</li>
+              <li>1. Create a Supabase auth user with email: admin@collegesera.com</li>
               <li>2. The user will automatically be linked to the admin role</li>
               <li>3. Use those credentials to sign in</li>
             </ol>
