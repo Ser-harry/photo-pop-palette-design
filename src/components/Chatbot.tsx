@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,7 +6,7 @@ import { MessageCircle, Send, User } from "lucide-react";
 // import { useUser } from "@supabase/auth-helpers-react"; // REMOVE this import
 import { useToast } from "@/hooks/use-toast";
 // Use the project-provided session hook
-import useSession from "@/hooks/useSession";
+import { useSession } from "@/hooks/useSession";
 
 interface Message {
   sender: "user" | "bot";
