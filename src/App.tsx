@@ -1,4 +1,3 @@
-
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -57,6 +56,8 @@ function App() {
                   } 
                 />
                 
+                <Route path="/chat" element={<Suspense fallback={<div>Loading...</div>}><ChatPageWrapper /></Suspense>} />
+                
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
@@ -67,5 +68,9 @@ function App() {
     </QueryClientProvider>
   );
 }
+
+// Lazy load Chat page for performance
+import { lazy } from "react";
+const ChatPageWrapper = lazy(() => import("./pages/Chat"));
 
 export default App;
