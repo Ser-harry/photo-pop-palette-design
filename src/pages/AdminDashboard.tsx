@@ -33,6 +33,7 @@ const AdminDashboard = () => {
         setActiveTab('articles');
         break;
       case 'contact':
+      case 'lead':
         setActiveTab('crm');
         break;
       default:
@@ -90,7 +91,7 @@ const AdminDashboard = () => {
               <div className="flex items-center space-x-4">
                 <div className="w-80">
                   <AdminSearchAutocomplete 
-                    placeholder="Search colleges, articles, contacts..."
+                    placeholder="Search colleges, articles, contacts, leads..."
                     onSelect={handleSearchSelect}
                   />
                 </div>

@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, MapPin, Building2, GraduationCap, Users, FileText } from "lucide-react";
+import { Search, MapPin, Building2, GraduationCap, Users, FileText, Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
 import { getColleges } from "@/services/collegeService";
@@ -22,7 +21,7 @@ interface AdminSearchAutocompleteProps {
 }
 
 const AdminSearchAutocomplete = ({ 
-  placeholder = "Search colleges, articles, contacts...", 
+  placeholder = "Search colleges, articles, contacts, leads...", 
   className = "",
   onSelect
 }: AdminSearchAutocompleteProps) => {
@@ -68,6 +67,25 @@ const AdminSearchAutocomplete = ({
     }
   });
 
+  // Fetch CRM leads for search
+  const { data: leads = [] } = useQuery({
+    queryKey: ['admin-leads-search'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('crm_leads')
+        .select(`
+          id, 
+          status, 
+          priority,
+          contact:crm_contacts(name, email)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce((searchQuery: string) => {
@@ -77,11 +95,11 @@ const AdminSearchAutocomplete = ({
         return;
       }
 
-      const filtered = generateAdminSuggestions(searchQuery, colleges, articles, contacts);
+      const filtered = generateAdminSuggestions(searchQuery, colleges, articles, contacts, leads);
       setSuggestions(filtered);
       setIsLoading(false);
     }, 300),
-    [colleges, articles, contacts]
+    [colleges, articles, contacts, leads]
   );
 
   useEffect(() => {
@@ -98,7 +116,8 @@ const AdminSearchAutocomplete = ({
     searchQuery: string, 
     collegeData: any[], 
     articleData: any[], 
-    contactData: any[]
+    contactData: any[],
+    leadData: any[]
   ): AdminSearchSuggestion[] => {
     const query = searchQuery.toLowerCase();
     const suggestions: AdminSearchSuggestion[] = [];
@@ -142,6 +161,21 @@ const AdminSearchAutocomplete = ({
           icon: <Users className="w-4 h-4 text-green-500" />
         });
         seen.add(contact.name);
+      }
+    });
+
+    // CRM Leads
+    leadData.forEach(lead => {
+      const contactName = lead.contact?.name || 'Unknown Contact';
+      const leadText = `${contactName} - ${lead.status} (${lead.priority} priority)`;
+      if (contactName.toLowerCase().includes(query) && !seen.has(leadText)) {
+        suggestions.push({
+          id: `lead-${lead.id}`,
+          text: leadText,
+          type: 'lead',
+          icon: <Target className="w-4 h-4 text-orange-500" />
+        });
+        seen.add(leadText);
       }
     });
 
