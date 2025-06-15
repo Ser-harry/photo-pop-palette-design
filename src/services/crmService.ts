@@ -2,6 +2,30 @@
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseCrmContact, DatabaseCrmLead, DatabaseCrmInteraction } from "@/types/database";
 
+// Input interfaces for creating records with proper required fields
+interface CreateContactInput {
+  name: string;
+  email?: string;
+  phone?: string;
+  contact_type?: string;
+  source?: string;
+  status?: string;
+  notes?: string;
+  created_by?: string;
+}
+
+interface CreateInteractionInput {
+  interaction_type: string;
+  contact_id?: string;
+  lead_id?: string;
+  subject?: string;
+  description?: string;
+  outcome?: string;
+  next_action?: string;
+  next_action_date?: string;
+  created_by?: string;
+}
+
 export async function getContacts(): Promise<DatabaseCrmContact[]> {
   const { data, error } = await supabase
     .from('crm_contacts')
@@ -12,7 +36,7 @@ export async function getContacts(): Promise<DatabaseCrmContact[]> {
   return data || [];
 }
 
-export async function createContact(contact: Partial<DatabaseCrmContact>): Promise<DatabaseCrmContact> {
+export async function createContact(contact: CreateContactInput): Promise<DatabaseCrmContact> {
   const { data, error } = await supabase
     .from('crm_contacts')
     .insert([contact])
@@ -89,7 +113,7 @@ export async function getInteractions(contactId?: string, leadId?: string): Prom
   return data || [];
 }
 
-export async function createInteraction(interaction: Partial<DatabaseCrmInteraction>): Promise<DatabaseCrmInteraction> {
+export async function createInteraction(interaction: CreateInteractionInput): Promise<DatabaseCrmInteraction> {
   const { data, error } = await supabase
     .from('crm_interactions')
     .insert([interaction])
