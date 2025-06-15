@@ -12,6 +12,25 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Move, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { DatabaseHomepageContent, DatabaseHomepageArticle, DatabaseArticle } from "@/types/database";
+
+interface HeroContentData {
+  title: string;
+  subtitle: string;
+  background_image: string;
+}
+
+interface CollegeSectionUpdate {
+  sectionName: string;
+  data: {
+    colleges: Array<{ name: string; location: string }>;
+  };
+}
+
+interface AddToHomepageParams {
+  articleId: string;
+  position: number;
+}
 
 const HomepageContentManagement = () => {
   const { toast } = useToast();
@@ -28,7 +47,7 @@ const HomepageContentManagement = () => {
         .order('display_order');
       
       if (error) throw error;
-      return data;
+      return data as DatabaseHomepageContent[];
     }
   });
 
@@ -51,7 +70,7 @@ const HomepageContentManagement = () => {
         .order('position');
       
       if (error) throw error;
-      return data;
+      return data as (DatabaseHomepageArticle & { articles: DatabaseArticle })[];
     }
   });
 
@@ -66,7 +85,7 @@ const HomepageContentManagement = () => {
         .order('published_at', { ascending: false });
       
       if (error) throw error;
-      return data;
+      return data as DatabaseArticle[];
     }
   });
 
@@ -107,18 +126,29 @@ const HomepageContentManagement = () => {
   );
 };
 
-const HeroSectionManager = ({ content }) => {
+const HeroSectionManager = ({ content }: { content: DatabaseHomepageContent[] | undefined }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const heroContent = content?.find(c => c.section_name === 'hero_banner');
-  const [formData, setFormData] = useState({
-    title: heroContent?.content?.title || "",
-    subtitle: heroContent?.content?.subtitle || "",
-    background_image: heroContent?.content?.background_image || ""
-  });
+  
+  // Type-safe content extraction
+  const getHeroContent = (content: any): HeroContentData => {
+    if (content && typeof content === 'object') {
+      return {
+        title: content.title || "",
+        subtitle: content.subtitle || "",
+        background_image: content.background_image || ""
+      };
+    }
+    return { title: "", subtitle: "", background_image: "" };
+  };
+
+  const [formData, setFormData] = useState<HeroContentData>(
+    getHeroContent(heroContent?.content)
+  );
 
   const updateMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: HeroContentData) => {
       const { error } = await supabase
         .from('homepage_content')
         .update({
@@ -181,17 +211,17 @@ const HeroSectionManager = ({ content }) => {
   );
 };
 
-const CollegeSectionsManager = ({ content }) => {
+const CollegeSectionsManager = ({ content }: { content: DatabaseHomepageContent[] | undefined }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingSection, setEditingSection] = useState(null);
+  const [editingSection, setEditingSection] = useState<DatabaseHomepageContent | null>(null);
 
   const sections = content?.filter(c => 
     c.section_name === 'offline_colleges' || c.section_name === 'distance_colleges'
   ) || [];
 
   const updateMutation = useMutation({
-    mutationFn: async ({ sectionName, data }) => {
+    mutationFn: async ({ sectionName, data }: CollegeSectionUpdate) => {
       const { error } = await supabase
         .from('homepage_content')
         .update({
@@ -208,6 +238,14 @@ const CollegeSectionsManager = ({ content }) => {
       toast({ title: "Section updated successfully" });
     }
   });
+
+  // Type-safe college extraction
+  const getColleges = (content: any): Array<{ name: string; location: string }> => {
+    if (content && typeof content === 'object' && content.colleges && Array.isArray(content.colleges)) {
+      return content.colleges;
+    }
+    return [];
+  };
 
   return (
     <div className="space-y-6">
@@ -231,7 +269,7 @@ const CollegeSectionsManager = ({ content }) => {
             <div className="space-y-2">
               <h4 className="font-medium">{section.title}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {section.content.colleges?.map((college, index) => (
+                {getColleges(section.content).map((college, index) => (
                   <div key={index} className="p-3 border rounded-lg">
                     <div className="font-medium">{college.name}</div>
                     <div className="text-sm text-gray-600">{college.location}</div>
@@ -258,10 +296,28 @@ const CollegeSectionsManager = ({ content }) => {
   );
 };
 
-const CollegeSectionEditor = ({ section, onSave, onCancel, isLoading }) => {
+const CollegeSectionEditor = ({ 
+  section, 
+  onSave, 
+  onCancel, 
+  isLoading 
+}: { 
+  section: DatabaseHomepageContent;
+  onSave: (data: { colleges: Array<{ name: string; location: string }> }) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) => {
+  // Type-safe college extraction
+  const getColleges = (content: any): Array<{ name: string; location: string }> => {
+    if (content && typeof content === 'object' && content.colleges && Array.isArray(content.colleges)) {
+      return content.colleges;
+    }
+    return [];
+  };
+
   const [formData, setFormData] = useState({
     title: section.title,
-    colleges: section.content.colleges || []
+    colleges: getColleges(section.content)
   });
   const [newCollege, setNewCollege] = useState({ name: "", location: "" });
 
@@ -275,7 +331,7 @@ const CollegeSectionEditor = ({ section, onSave, onCancel, isLoading }) => {
     }
   };
 
-  const removeCollege = (index) => {
+  const removeCollege = (index: number) => {
     setFormData(prev => ({
       ...prev,
       colleges: prev.colleges.filter((_, i) => i !== index)
@@ -343,13 +399,19 @@ const CollegeSectionEditor = ({ section, onSave, onCancel, isLoading }) => {
   );
 };
 
-const NewsSectionManager = ({ homepageArticles, availableArticles }) => {
+const NewsSectionManager = ({ 
+  homepageArticles, 
+  availableArticles 
+}: { 
+  homepageArticles: (DatabaseHomepageArticle & { articles: DatabaseArticle })[] | undefined;
+  availableArticles: DatabaseArticle[] | undefined;
+}) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedArticleId, setSelectedArticleId] = useState("");
 
   const addToHomepageMutation = useMutation({
-    mutationFn: async ({ articleId, position }) => {
+    mutationFn: async ({ articleId, position }: AddToHomepageParams) => {
       const { error } = await supabase
         .from('homepage_articles')
         .insert([{
@@ -369,7 +431,7 @@ const NewsSectionManager = ({ homepageArticles, availableArticles }) => {
   });
 
   const removeFromHomepageMutation = useMutation({
-    mutationFn: async (homepageArticleId) => {
+    mutationFn: async (homepageArticleId: string) => {
       const { error } = await supabase
         .from('homepage_articles')
         .delete()
@@ -464,7 +526,7 @@ const NewsSectionManager = ({ homepageArticles, availableArticles }) => {
   );
 };
 
-const BannersManager = ({ content }) => {
+const BannersManager = ({ content }: { content: DatabaseHomepageContent[] | undefined }) => {
   return (
     <Card>
       <CardHeader>

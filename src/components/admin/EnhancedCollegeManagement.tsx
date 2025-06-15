@@ -14,16 +14,31 @@ import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Star, StarOff, Search, Filter, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { DatabaseCollege } from "@/types/database";
+
+type CollegeFormData = Omit<DatabaseCollege, 'id' | 'created_at' | 'updated_at'>;
+
+interface ToggleFeatureParams {
+  collegeId: string;
+  field: 'featured' | 'homepage_featured';
+  value: boolean;
+}
+
+interface BulkUpdateParams {
+  collegeIds: string[];
+  field: 'featured' | 'homepage_featured';
+  value: boolean;
+}
 
 const EnhancedCollegeManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingCollege, setEditingCollege] = useState(null);
+  const [editingCollege, setEditingCollege] = useState<DatabaseCollege | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [districtFilter, setDistrictFilter] = useState("all");
-  const [selectedColleges, setSelectedColleges] = useState(new Set());
+  const [selectedColleges, setSelectedColleges] = useState(new Set<string>());
 
   // Fetch colleges from database
   const { data: colleges, isLoading } = useQuery({
@@ -35,13 +50,13 @@ const EnhancedCollegeManagement = () => {
         .order('name');
       
       if (error) throw error;
-      return data;
+      return data as DatabaseCollege[];
     }
   });
 
   // Mutations for college operations
   const saveMutation = useMutation({
-    mutationFn: async (collegeData) => {
+    mutationFn: async (collegeData: CollegeFormData) => {
       if (editingCollege) {
         const { error } = await supabase
           .from('colleges')
@@ -67,7 +82,7 @@ const EnhancedCollegeManagement = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (collegeId) => {
+    mutationFn: async (collegeId: string) => {
       const { error } = await supabase
         .from('colleges')
         .delete()
@@ -81,7 +96,7 @@ const EnhancedCollegeManagement = () => {
   });
 
   const toggleFeatureMutation = useMutation({
-    mutationFn: async ({ collegeId, field, value }) => {
+    mutationFn: async ({ collegeId, field, value }: ToggleFeatureParams) => {
       const { error } = await supabase
         .from('colleges')
         .update({ [field]: value })
@@ -95,7 +110,7 @@ const EnhancedCollegeManagement = () => {
   });
 
   const bulkFeatureMutation = useMutation({
-    mutationFn: async ({ collegeIds, field, value }) => {
+    mutationFn: async ({ collegeIds, field, value }: BulkUpdateParams) => {
       const { error } = await supabase
         .from('colleges')
         .update({ [field]: value })
@@ -121,7 +136,7 @@ const EnhancedCollegeManagement = () => {
   // Get unique districts for filter
   const districts = [...new Set(colleges?.map(c => c.district) || [])];
 
-  const handleSelectCollege = (collegeId, checked) => {
+  const handleSelectCollege = (collegeId: string, checked: boolean) => {
     const newSelected = new Set(selectedColleges);
     if (checked) {
       newSelected.add(collegeId);
@@ -131,7 +146,7 @@ const EnhancedCollegeManagement = () => {
     setSelectedColleges(newSelected);
   };
 
-  const handleBulkAction = (field, value) => {
+  const handleBulkAction = (field: 'featured' | 'homepage_featured', value: boolean) => {
     if (selectedColleges.size === 0) return;
     bulkFeatureMutation.mutate({
       collegeIds: Array.from(selectedColleges),
@@ -308,7 +323,7 @@ const EnhancedCollegeManagement = () => {
                   <TableCell>
                     <Checkbox
                       checked={selectedColleges.has(college.id)}
-                      onCheckedChange={(checked) => handleSelectCollege(college.id, checked)}
+                      onCheckedChange={(checked) => handleSelectCollege(college.id, checked as boolean)}
                     />
                   </TableCell>
                   <TableCell className="font-medium">
@@ -389,8 +404,18 @@ const EnhancedCollegeManagement = () => {
   );
 };
 
-const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
-  const [formData, setFormData] = useState({
+const CollegeForm = ({ 
+  college, 
+  onSave, 
+  onCancel, 
+  isLoading 
+}: { 
+  college: DatabaseCollege | null;
+  onSave: (data: CollegeFormData) => void;
+  onCancel: () => void;
+  isLoading: boolean;
+}) => {
+  const [formData, setFormData] = useState<CollegeFormData>({
     name: college?.name || "",
     slug: college?.slug || "",
     location: college?.location || "",
@@ -412,7 +437,7 @@ const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
 
   const [newFacility, setNewFacility] = useState("");
 
-  const generateSlug = (name) => {
+  const generateSlug = (name: string) => {
     return name
       .toLowerCase()
       .replace(/[^a-z0-9 ]/g, '')
@@ -420,7 +445,7 @@ const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
       .trim();
   };
 
-  const handleNameChange = (name) => {
+  const handleNameChange = (name: string) => {
     setFormData(prev => ({
       ...prev,
       name,
@@ -438,14 +463,14 @@ const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
     }
   };
 
-  const removeFacility = (facilityToRemove) => {
+  const removeFacility = (facilityToRemove: string) => {
     setFormData(prev => ({
       ...prev,
       facilities: prev.facilities.filter(facility => facility !== facilityToRemove)
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
@@ -614,7 +639,7 @@ const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
           <Checkbox
             id="featured"
             checked={formData.featured}
-            onCheckedChange={(featured) => setFormData(prev => ({ ...prev, featured }))}
+            onCheckedChange={(featured) => setFormData(prev => ({ ...prev, featured: featured as boolean }))}
           />
           <Label htmlFor="featured">Featured College</Label>
         </div>
@@ -622,7 +647,7 @@ const CollegeForm = ({ college, onSave, onCancel, isLoading }) => {
           <Checkbox
             id="homepage_featured"
             checked={formData.homepage_featured}
-            onCheckedChange={(homepage_featured) => setFormData(prev => ({ ...prev, homepage_featured }))}
+            onCheckedChange={(homepage_featured) => setFormData(prev => ({ ...prev, homepage_featured: homepage_featured as boolean }))}
           />
           <Label htmlFor="homepage_featured">Show on Homepage</Label>
         </div>

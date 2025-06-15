@@ -4,6 +4,15 @@ import { GraduationCap, MapPin, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
+interface CollegeItem {
+  name: string;
+  location: string;
+}
+
+interface CollegeContent {
+  colleges: CollegeItem[];
+}
+
 const DynamicCollegeSections = () => {
   // Fetch homepage content for college sections
   const { data: homepageContent } = useQuery({
@@ -24,7 +33,13 @@ const DynamicCollegeSections = () => {
   const offlineSection = homepageContent?.find(c => c.section_name === 'offline_colleges');
   const distanceSection = homepageContent?.find(c => c.section_name === 'distance_colleges');
 
-  const CollegeList = ({ title, colleges, icon: Icon, bgColor, textColor }) => (
+  const CollegeList = ({ title, colleges, icon: Icon, bgColor, textColor }: {
+    title: string;
+    colleges: CollegeItem[];
+    icon: React.ComponentType<{ className?: string }>;
+    bgColor: string;
+    textColor: string;
+  }) => (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className={`${bgColor} ${textColor} p-6`}>
         <div className="flex items-center gap-3">
@@ -73,6 +88,14 @@ const DynamicCollegeSections = () => {
     return null; // Don't render if no content is configured
   }
 
+  // Type-safe content extraction
+  const getColleges = (content: any): CollegeItem[] => {
+    if (content && typeof content === 'object' && content.colleges && Array.isArray(content.colleges)) {
+      return content.colleges;
+    }
+    return [];
+  };
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -89,7 +112,7 @@ const DynamicCollegeSections = () => {
           {offlineSection && (
             <CollegeList
               title={offlineSection.title}
-              colleges={offlineSection.content?.colleges || []}
+              colleges={getColleges(offlineSection.content)}
               icon={GraduationCap}
               bgColor="bg-blue-600"
               textColor="text-white"
@@ -99,7 +122,7 @@ const DynamicCollegeSections = () => {
           {distanceSection && (
             <CollegeList
               title={distanceSection.title}
-              colleges={distanceSection.content?.colleges || []}
+              colleges={getColleges(distanceSection.content)}
               icon={GraduationCap}
               bgColor="bg-green-600"
               textColor="text-white"
