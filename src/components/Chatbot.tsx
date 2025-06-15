@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, Send, User } from "lucide-react";
-import { useUser } from "@supabase/auth-helpers-react";
+// import { useUser } from "@supabase/auth-helpers-react"; // REMOVE this import
 import { useToast } from "@/hooks/use-toast";
+// Use the project-provided session hook
+import useSession from "@/hooks/useSession";
 
 interface Message {
   sender: "user" | "bot";
@@ -21,9 +23,11 @@ export default function Chatbot() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const user = useUser();
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // Use the custom hook for user session (assume it returns { user })
+  const { user } = useSession() || {};
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -44,7 +48,7 @@ export default function Chatbot() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // If you want, you can add user id: user?.id
+          // You can attach the user id or token if needed here
         },
         body: JSON.stringify({ query: content }),
       });

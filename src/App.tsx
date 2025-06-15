@@ -23,6 +23,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminUnauthorized = lazy(() => import("./pages/AdminUnauthorized"));
+const ChatPageWrapper = lazy(() => import("./pages/Chat"));
 
 function App() {
   return (
@@ -68,9 +69,5 @@ function App() {
     </QueryClientProvider>
   );
 }
-
-// Lazy load Chat page for performance
-import { lazy } from "react";
-const ChatPageWrapper = lazy(() => import("./pages/Chat"));
 
 export default App;
