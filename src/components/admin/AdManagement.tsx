@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,11 @@ const AdManagement = () => {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 30000, // Consider data fresh for 30 seconds
-    onError: (error) => {
+  });
+
+  // Handle query errors with useEffect
+  useEffect(() => {
+    if (error) {
       console.error('Query error in AdManagement:', error);
       toast({
         title: "Failed to load advertisements",
@@ -40,7 +43,7 @@ const AdManagement = () => {
         variant: "destructive"
       });
     }
-  });
+  }, [error, toast]);
 
   const createMutation = useMutation({
     mutationFn: createAd,
