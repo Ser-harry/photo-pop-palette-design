@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@/hooks/useSession";
 import { useUser } from "@clerk/clerk-react";
 import { supabase } from "@/integrations/supabase/client";
+import ChatSuggestions from "./ChatSuggestions";
+import ChatSignInPrompt from "./ChatSignInPrompt";
 
 interface Message {
   sender: "user" | "bot";
@@ -14,14 +16,10 @@ interface Message {
 }
 
 export default function Chatbot() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      sender: "bot",
-      text: "Hello! Ask me anything about colleges or general queries.",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const { toast } = useToast();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
@@ -29,15 +27,16 @@ export default function Chatbot() {
   const { user, isSignedIn } = useUser();
   const { sessionId } = useSession();
 
-  // Update greeting message when user signs in
+  // Initialize greeting message when user signs in
   useEffect(() => {
     if (isSignedIn && user?.firstName) {
       setMessages([
         {
           sender: "bot",
-          text: `Hello ${user.firstName}! Ask me anything about colleges or general queries.`,
+          text: `Hello ${user.firstName}! I'm your college assistant. Ask me anything about colleges, admissions, or browse the popular topics below.`,
         },
       ]);
+      setShowSuggestions(true);
     }
   }, [isSignedIn, user?.firstName]);
 
@@ -46,13 +45,14 @@ export default function Chatbot() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const content = input.trim();
+  const handleSend = async (queryText?: string) => {
+    const content = queryText || input.trim();
     if (!content || loading) return;
+    
     setMessages((msgs) => [...msgs, { sender: "user", text: content }]);
     setLoading(true);
     setInput("");
+    setShowSuggestions(false); // Hide suggestions after first message
 
     try {
       console.log("Sending query to answer-query function:", content);
@@ -94,10 +94,22 @@ export default function Chatbot() {
     }
   };
 
-  // Allow all users to chat (both authenticated and anonymous)
-  const canChat = !!sessionId;
+  const handleSuggestionClick = (suggestion: string) => {
+    handleSend(suggestion);
+  };
 
-  if (!canChat) {
+  const handleFormSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    handleSend();
+  };
+
+  // Show sign-in prompt if user is not authenticated
+  if (!isSignedIn) {
+    return <ChatSignInPrompt />;
+  }
+
+  // Show loading if session is not ready
+  if (!sessionId) {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-40">
         <MessageCircle className="mb-2 text-orange-500" size={32} />
@@ -133,6 +145,7 @@ export default function Chatbot() {
             </div>
           </div>
         ))}
+        
         {loading && (
           <div className="flex justify-start">
             <div className="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg shadow-sm max-w-[240px] flex items-start gap-2 text-sm">
@@ -141,22 +154,27 @@ export default function Chatbot() {
             </div>
           </div>
         )}
+        
+        {/* Show suggestions only when there are no messages or just the initial greeting */}
+        {showSuggestions && messages.length <= 1 && (
+          <div className="mt-2">
+            <ChatSuggestions onSuggestionClick={handleSuggestionClick} />
+          </div>
+        )}
+        
         <div ref={bottomRef}></div>
       </div>
+      
       <form
         className="flex gap-2"
-        onSubmit={handleSend}
+        onSubmit={handleFormSubmit}
         autoComplete="off"
         spellCheck={false}
       >
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder={
-            isSignedIn 
-              ? "Ask about colleges..." 
-              : "Ask about colleges... (Sign in for personalized help)"
-          }
+          placeholder="Ask about colleges, admissions, TNEA..."
           className="flex-1 text-sm"
           disabled={loading}
           minLength={1}
