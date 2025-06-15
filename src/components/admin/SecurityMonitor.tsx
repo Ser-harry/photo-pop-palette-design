@@ -13,7 +13,7 @@ interface SecurityEvent {
   details: any;
   created_at: string;
   admin_user_id: string;
-  ip_address?: string;
+  ip_address?: string | null;
 }
 
 const SecurityMonitor = () => {
@@ -39,7 +39,17 @@ const SecurityMonitor = () => {
         return;
       }
 
-      setRecentEvents(data || []);
+      // Transform the data to match our interface
+      const transformedData: SecurityEvent[] = (data || []).map(item => ({
+        id: item.id,
+        action: item.action,
+        details: item.details,
+        created_at: item.created_at,
+        admin_user_id: item.admin_user_id,
+        ip_address: item.ip_address as string | null
+      }));
+
+      setRecentEvents(transformedData);
     } catch (error) {
       SecurityUtils.secureLog('Security events loading error', error);
     } finally {

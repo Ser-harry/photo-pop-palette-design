@@ -110,13 +110,20 @@ export class AdminAuthService {
   // Log login attempts for security monitoring
   static async logLoginAttempt(email: string, success: boolean, details: string) {
     try {
-      // Use a separate function call to avoid issues with admin_activity_logs policies
-      const { error } = await supabase.rpc('log_admin_login_attempt', {
-        email_input: SecurityUtils.sanitizeText(email),
-        success_flag: success,
-        attempt_details: details,
-        ip_addr: await this.getClientIP()
-      });
+      // Direct insert to admin_activity_logs since we don't have the RPC function
+      const { error } = await supabase
+        .from('admin_activity_logs')
+        .insert({
+          admin_user_id: '00000000-0000-0000-0000-000000000000', // Placeholder for login attempts
+          action: 'login_attempt',
+          details: {
+            email: SecurityUtils.sanitizeText(email),
+            success: success,
+            details: details,
+            ip_address: await this.getClientIP(),
+            timestamp: new Date().toISOString()
+          }
+        });
 
       if (error) {
         SecurityUtils.secureLog('Failed to log login attempt', error);
@@ -203,9 +210,14 @@ export class AdminAuthService {
   // Get client IP (enhanced)
   static async getClientIP(): Promise<string> {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch('https://api.ipify.org?format=json', {
-        timeout: 5000
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       const data = await response.json();
       return data.ip || 'unknown';
     } catch {
