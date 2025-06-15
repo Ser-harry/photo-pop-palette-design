@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { DatabaseAdvertisement } from "@/types/database";
 
@@ -62,6 +63,13 @@ export async function createAd(adData: {
     throw new Error('Start date cannot be after end date');
   }
 
+  // Validate image URL format
+  try {
+    new URL(adData.image_url);
+  } catch {
+    throw new Error('Invalid image URL format');
+  }
+
   const { data, error } = await supabase
     .from('advertisements')
     .insert([adData])
@@ -93,6 +101,15 @@ export async function updateAd(id: string, adData: Partial<{
   end_date: string;
   is_active: boolean;
 }>): Promise<DatabaseAdvertisement> {
+  // Validate image URL if provided
+  if (adData.image_url) {
+    try {
+      new URL(adData.image_url);
+    } catch {
+      throw new Error('Invalid image URL format');
+    }
+  }
+
   const { data, error } = await supabase
     .from('advertisements')
     .update(adData)
@@ -120,23 +137,26 @@ export async function deleteAd(id: string): Promise<void> {
   }
 }
 
+// Optimized impression tracking - increment directly without fetching first
 export async function trackAdImpression(adId: string): Promise<void> {
   try {
-    // First get current impressions count
-    const { data: currentAd } = await supabase
-      .from('advertisements')
-      .select('impressions')
-      .eq('id', adId)
-      .single();
-
-    if (currentAd) {
-      const { error } = await supabase
+    const { error } = await supabase.rpc('increment_ad_impressions', {
+      ad_id: adId
+    });
+    
+    if (error) {
+      // Fallback to the old method if RPC function doesn't exist
+      const { data: currentAd } = await supabase
         .from('advertisements')
-        .update({ impressions: currentAd.impressions + 1 })
-        .eq('id', adId);
-      
-      if (error) {
-        console.error('Error tracking ad impression:', error);
+        .select('impressions')
+        .eq('id', adId)
+        .single();
+
+      if (currentAd) {
+        await supabase
+          .from('advertisements')
+          .update({ impressions: currentAd.impressions + 1 })
+          .eq('id', adId);
       }
     }
   } catch (error) {
@@ -144,23 +164,26 @@ export async function trackAdImpression(adId: string): Promise<void> {
   }
 }
 
+// Optimized click tracking - increment directly without fetching first
 export async function trackAdClick(adId: string): Promise<void> {
   try {
-    // First get current clicks count
-    const { data: currentAd } = await supabase
-      .from('advertisements')
-      .select('clicks')
-      .eq('id', adId)
-      .single();
-
-    if (currentAd) {
-      const { error } = await supabase
+    const { error } = await supabase.rpc('increment_ad_clicks', {
+      ad_id: adId
+    });
+    
+    if (error) {
+      // Fallback to the old method if RPC function doesn't exist
+      const { data: currentAd } = await supabase
         .from('advertisements')
-        .update({ clicks: currentAd.clicks + 1 })
-        .eq('id', adId);
-      
-      if (error) {
-        console.error('Error tracking ad click:', error);
+        .select('clicks')
+        .eq('id', adId)
+        .single();
+
+      if (currentAd) {
+        await supabase
+          .from('advertisements')
+          .update({ clicks: currentAd.clicks + 1 })
+          .eq('id', adId);
       }
     }
   } catch (error) {
