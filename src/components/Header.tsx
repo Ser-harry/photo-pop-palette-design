@@ -14,18 +14,20 @@ const Header = ({ onBookingClick }: HeaderProps) => {
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="grid grid-cols-3 items-center py-4 gap-4">
+        <div className="flex items-center justify-between py-4 gap-4">
           {/* Left: Logo + Mobile Menu */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-shrink-0">
             <MobileNavigation navItems={navItems} onBookingClick={onBookingClick} />
             <HeaderLogo />
           </div>
 
-          {/* Center: Navigation - Hidden on mobile */}
-          <DesktopNavigation navItems={navItems} />
+          {/* Center: Navigation - Takes available space */}
+          <div className="flex-1 flex justify-center max-w-4xl">
+            <DesktopNavigation navItems={navItems} />
+          </div>
 
           {/* Right: Search and Auth */}
-          <div className="flex items-center justify-end space-x-3">
+          <div className="flex items-center space-x-3 flex-shrink-0">
             <SearchSection />
             <UserAuthentication onBookingClick={onBookingClick} />
           </div>
