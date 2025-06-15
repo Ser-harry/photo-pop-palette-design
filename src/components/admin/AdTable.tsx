@@ -1,96 +1,101 @@
 
+import { DatabaseAdvertisement } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Edit, Trash2, Eye, EyeOff } from "lucide-react";
-import { DatabaseAdvertisement } from "@/types/database";
 
 interface AdTableProps {
   ads: DatabaseAdvertisement[];
   onEdit: (ad: DatabaseAdvertisement) => void;
   onDelete: (id: string) => void;
   onToggleActive: (ad: DatabaseAdvertisement) => void;
+  disabled?: boolean;
 }
 
-const AdTable = ({ ads, onEdit, onDelete, onToggleActive }: AdTableProps) => {
+const AdTable = ({ ads, onEdit, onDelete, onToggleActive, disabled = false }: AdTableProps) => {
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Placement</TableHead>
-          <TableHead>Schedule</TableHead>
-          <TableHead>Performance</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {ads.map((ad) => (
-          <TableRow key={ad.id}>
-            <TableCell>
-              <div className="flex items-center space-x-3">
-                <img 
-                  src={ad.image_url} 
-                  alt={ad.title}
-                  className="w-12 h-12 object-cover rounded"
-                />
-                <div>
-                  <div className="font-medium">{ad.title}</div>
-                  <div className="text-sm text-gray-500">{ad.cta_text}</div>
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left p-3 font-semibold">Title</th>
+            <th className="text-left p-3 font-semibold">Placement</th>
+            <th className="text-left p-3 font-semibold">Status</th>
+            <th className="text-left p-3 font-semibold">Clicks</th>
+            <th className="text-left p-3 font-semibold">Impressions</th>
+            <th className="text-left p-3 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ads.map((ad) => (
+            <tr key={ad.id} className="border-b hover:bg-gray-50">
+              <td className="p-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                    <img 
+                      src={ad.image_url} 
+                      alt={ad.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = '<div class="w-full h-full bg-gray-300 flex items-center justify-center text-xs text-gray-500">No Image</div>';
+                        }
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <div className="font-medium">{ad.title}</div>
+                    <div className="text-sm text-gray-500">{ad.cta_text}</div>
+                  </div>
                 </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Badge variant="outline">{ad.placement}</Badge>
-            </TableCell>
-            <TableCell>
-              <div className="text-sm">
-                <div>{new Date(ad.start_date).toLocaleDateString()}</div>
-                <div className="text-gray-500">to {new Date(ad.end_date).toLocaleDateString()}</div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="text-sm">
-                <div>{ad.clicks} clicks</div>
-                <div className="text-gray-500">{ad.impressions} impressions</div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => onToggleActive(ad)}
-              >
-                {ad.is_active ? (
-                  <Eye className="w-4 h-4 text-green-500" />
-                ) : (
-                  <EyeOff className="w-4 h-4 text-gray-500" />
-                )}
-              </Button>
-            </TableCell>
-            <TableCell>
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onEdit(ad)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={() => onDelete(ad.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+              </td>
+              <td className="p-3">
+                <Badge variant="outline">{ad.placement}</Badge>
+              </td>
+              <td className="p-3">
+                <Badge variant={ad.is_active ? "default" : "secondary"}>
+                  {ad.is_active ? "Active" : "Inactive"}
+                </Badge>
+              </td>
+              <td className="p-3">{ad.clicks}</td>
+              <td className="p-3">{ad.impressions}</td>
+              <td className="p-3">
+                <div className="flex space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEdit(ad)}
+                    disabled={disabled}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onToggleActive(ad)}
+                    disabled={disabled}
+                  >
+                    {ad.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onDelete(ad.id)}
+                    disabled={disabled}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 };
 

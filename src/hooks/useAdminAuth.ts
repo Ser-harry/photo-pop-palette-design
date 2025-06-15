@@ -26,26 +26,54 @@ export const useAdminAuth = () => {
     resetAuthState();
   }, [resetAuthState]);
 
+  // Enhanced session management with retry logic
+  const checkAdminUser = useCallback(async (userId: string, retryCount = 0): Promise<AdminUser | null> => {
+    try {
+      const adminData = await AdminAuthService.getAdminUser(userId);
+      if (adminData) {
+        console.log('Admin user verified:', adminData.role);
+        return adminData;
+      } else if (retryCount < 2) {
+        // Retry after a short delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return checkAdminUser(userId, retryCount + 1);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error checking admin user:', error);
+      if (retryCount < 2) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        return checkAdminUser(userId, retryCount + 1);
+      }
+      throw error;
+    }
+  }, []);
+
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
+    // Get initial session with enhanced error handling
     const getInitialSession = async () => {
       try {
+        setLoading(true);
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Session error:', error);
+          throw error;
+        }
         
         if (session?.user && mounted) {
           setUser(session.user);
           console.log('Initial session found for user:', session.user.id);
           
           try {
-            const adminData = await AdminAuthService.getAdminUser(session.user.id);
+            const adminData = await checkAdminUser(session.user.id);
             if (adminData && mounted) {
               setAdminUser(adminData);
               setIsAuthenticated(true);
-              console.log('Admin user found:', adminData.role);
+              setError(null);
+              console.log('Admin authentication successful:', adminData.role);
             } else if (mounted) {
               console.log('No admin privileges found for user');
               resetAuthState();
@@ -57,6 +85,7 @@ export const useAdminAuth = () => {
             }
           }
         } else if (mounted) {
+          console.log('No initial session found');
           resetAuthState();
         }
       } catch (error) {
@@ -72,21 +101,24 @@ export const useAdminAuth = () => {
 
     getInitialSession();
 
-    // Listen for auth changes
+    // Listen for auth changes with enhanced handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
-        console.log('Admin auth state change:', event);
+        console.log('Admin auth state change:', event, session?.user?.id);
         
-        if (session?.user) {
-          setUser(session.user);
-          try {
-            const adminData = await AdminAuthService.getAdminUser(session.user.id);
+        try {
+          if (session?.user) {
+            setUser(session.user);
+            setLoading(true);
+            
+            const adminData = await checkAdminUser(session.user.id);
             if (adminData && mounted) {
               setAdminUser(adminData);
               setIsAuthenticated(true);
               setError(null);
+              console.log('Auth state change - admin verified:', adminData.role);
             } else if (mounted) {
               resetAuthState();
               if (event === 'SIGNED_IN') {
@@ -97,17 +129,18 @@ export const useAdminAuth = () => {
                 });
               }
             }
-          } catch (adminError) {
-            if (mounted) {
-              handleAuthError(adminError, 'auth state change');
-            }
+          } else if (mounted) {
+            console.log('Auth state change - no user');
+            resetAuthState();
           }
-        } else if (mounted) {
-          resetAuthState();
-        }
-        
-        if (mounted) {
-          setLoading(false);
+        } catch (adminError) {
+          if (mounted) {
+            handleAuthError(adminError, 'auth state change');
+          }
+        } finally {
+          if (mounted) {
+            setLoading(false);
+          }
         }
       }
     );
@@ -116,12 +149,14 @@ export const useAdminAuth = () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [toast, resetAuthState, handleAuthError]);
+  }, [toast, resetAuthState, handleAuthError, checkAdminUser]);
 
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('Attempting admin sign in for:', email);
+      
       const result = await AdminAuthService.signIn(email, password);
       
       toast({
@@ -132,6 +167,7 @@ export const useAdminAuth = () => {
       return result;
     } catch (error: any) {
       const errorMessage = error.message || "Invalid credentials";
+      console.error('Sign in error:', error);
       setError(errorMessage);
       toast({
         title: "Login Failed",
@@ -146,6 +182,7 @@ export const useAdminAuth = () => {
 
   const signOut = async () => {
     try {
+      setLoading(true);
       if (adminUser) {
         await AdminAuthService.logActivity(
           adminUser.id, 
@@ -157,6 +194,7 @@ export const useAdminAuth = () => {
       }
       
       await AdminAuthService.signOut();
+      resetAuthState();
       
       toast({
         title: "Logged Out",
@@ -169,6 +207,8 @@ export const useAdminAuth = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 

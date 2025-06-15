@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllAds, createAd, updateAd, deleteAd } from "@/services/advertisementService";
+import { getAllAds, createAd, updateAd, deleteAd, cleanupInvalidAds } from "@/services/advertisementService";
 import { DatabaseAdvertisement } from "@/types/database";
 import AdForm from "./AdForm";
 import AdStatsCards from "./AdStatsCards";
@@ -17,74 +17,127 @@ const AdManagement = () => {
   const queryClient = useQueryClient();
   const [editingAd, setEditingAd] = useState<DatabaseAdvertisement | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [operationInProgress, setOperationInProgress] = useState(false);
 
-  const { data: ads = [], isLoading, error } = useQuery({
+  // Cleanup invalid ads on component mount
+  useEffect(() => {
+    cleanupInvalidAds().catch(error => {
+      console.warn('Failed to cleanup invalid ads:', error);
+    });
+  }, []);
+
+  const { data: ads = [], isLoading, error, refetch } = useQuery({
     queryKey: ['advertisements'],
     queryFn: getAllAds,
     retry: 3,
-    retryDelay: 1000,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    onError: (error) => {
+      console.error('Query error in AdManagement:', error);
+      toast({
+        title: "Failed to load advertisements",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive"
+      });
+    }
   });
 
   const createMutation = useMutation({
     mutationFn: createAd,
+    onMutate: () => {
+      setOperationInProgress(true);
+    },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['advertisements'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'home'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'sidebar'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'results'] });
+      
       toast({ title: "Advertisement created successfully" });
       setIsDialogOpen(false);
       setEditingAd(null);
     },
     onError: (error: Error) => {
+      console.error('Create mutation error:', error);
       toast({ 
         title: "Failed to create advertisement", 
         description: error.message,
         variant: "destructive" 
       });
+    },
+    onSettled: () => {
+      setOperationInProgress(false);
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<DatabaseAdvertisement> }) => 
       updateAd(id, data),
+    onMutate: () => {
+      setOperationInProgress(true);
+    },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['advertisements'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'home'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'sidebar'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'results'] });
+      
       toast({ title: "Advertisement updated successfully" });
       setIsDialogOpen(false);
       setEditingAd(null);
     },
     onError: (error: Error) => {
+      console.error('Update mutation error:', error);
       toast({ 
         title: "Failed to update advertisement", 
         description: error.message,
         variant: "destructive" 
       });
+    },
+    onSettled: () => {
+      setOperationInProgress(false);
     }
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteAd,
+    onMutate: () => {
+      setOperationInProgress(true);
+    },
     onSuccess: () => {
+      // Invalidate all related queries
       queryClient.invalidateQueries({ queryKey: ['advertisements'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'home'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'sidebar'] });
       queryClient.invalidateQueries({ queryKey: ['advertisements', 'results'] });
+      
       toast({ title: "Advertisement deleted successfully" });
     },
     onError: (error: Error) => {
+      console.error('Delete mutation error:', error);
       toast({ 
         title: "Failed to delete advertisement", 
         description: error.message,
         variant: "destructive" 
       });
+    },
+    onSettled: () => {
+      setOperationInProgress(false);
     }
   });
 
   const handleSave = (adData: Partial<DatabaseAdvertisement>) => {
+    if (operationInProgress) {
+      toast({
+        title: "Operation in progress",
+        description: "Please wait for the current operation to complete",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (editingAd) {
       updateMutation.mutate({ id: editingAd.id, data: adData });
     } else {
@@ -93,11 +146,28 @@ const AdManagement = () => {
   };
 
   const handleEdit = (ad: DatabaseAdvertisement) => {
+    if (operationInProgress) {
+      toast({
+        title: "Operation in progress",
+        description: "Please wait for the current operation to complete",
+        variant: "destructive"
+      });
+      return;
+    }
     setEditingAd(ad);
     setIsDialogOpen(true);
   };
 
   const handleToggleActive = (ad: DatabaseAdvertisement) => {
+    if (operationInProgress) {
+      toast({
+        title: "Operation in progress",
+        description: "Please wait for the current operation to complete",
+        variant: "destructive"
+      });
+      return;
+    }
+
     updateMutation.mutate({ 
       id: ad.id, 
       data: { is_active: !ad.is_active } 
@@ -105,9 +175,22 @@ const AdManagement = () => {
   };
 
   const handleDelete = (id: string) => {
+    if (operationInProgress) {
+      toast({
+        title: "Operation in progress",
+        description: "Please wait for the current operation to complete",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (confirm('Are you sure you want to delete this advertisement?')) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleRetry = () => {
+    refetch();
   };
 
   if (error) {
@@ -115,6 +198,10 @@ const AdManagement = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold">Advertisement Management</h2>
+          <Button onClick={handleRetry} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
         </div>
         
         <Card className="border-red-200 bg-red-50">
@@ -126,14 +213,22 @@ const AdManagement = () => {
                 <p className="text-sm mt-1">
                   {error instanceof Error ? error.message : 'An unexpected error occurred'}
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-2"
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ['advertisements'] })}
-                >
-                  Retry
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleRetry}
+                  >
+                    Retry
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => queryClient.clear()}
+                  >
+                    Clear Cache
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -181,27 +276,41 @@ const AdManagement = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Advertisement Management</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingAd(null)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Create Ad
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>
-                {editingAd ? "Edit Advertisement" : "Create New Advertisement"}
-              </DialogTitle>
-            </DialogHeader>
-            <AdForm
-              ad={editingAd}
-              onSave={handleSave}
-              onCancel={() => setIsDialogOpen(false)}
-            />
-          </DialogContent>
-        </Dialog>
+        <div>
+          <h2 className="text-2xl font-bold">Advertisement Management</h2>
+          <p className="text-sm text-gray-600 mt-1">
+            {operationInProgress && "Operation in progress..."}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleRetry} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => setEditingAd(null)}
+                disabled={operationInProgress}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Ad
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingAd ? "Edit Advertisement" : "Create New Advertisement"}
+                </DialogTitle>
+              </DialogHeader>
+              <AdForm
+                ad={editingAd}
+                onSave={handleSave}
+                onCancel={() => setIsDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <AdStatsCards ads={ads} />
@@ -218,6 +327,7 @@ const AdManagement = () => {
                 variant="outline" 
                 className="mt-4"
                 onClick={() => setIsDialogOpen(true)}
+                disabled={operationInProgress}
               >
                 Create your first advertisement
               </Button>
@@ -228,6 +338,7 @@ const AdManagement = () => {
               onEdit={handleEdit}
               onDelete={handleDelete}
               onToggleActive={handleToggleActive}
+              disabled={operationInProgress}
             />
           )}
         </CardContent>
