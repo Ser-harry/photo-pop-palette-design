@@ -3,13 +3,15 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield } from "lucide-react";
+import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import CollegeManagement from "@/components/admin/CollegeManagement";
 import AdManagement from "@/components/admin/AdManagement";
 import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
 import SearchTrends from "@/components/admin/SearchTrends";
+import ArticleManagement from "@/components/admin/ArticleManagement";
+import DataImportWithSchema from "@/components/admin/DataImportWithSchema";
 
 const AdminDashboard = () => {
   const { signOut, adminUser } = useAdminAuth();
@@ -75,14 +77,22 @@ const AdminDashboard = () => {
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="colleges" className="flex items-center space-x-2">
                 <GraduationCap className="w-4 h-4" />
                 <span>Colleges</span>
               </TabsTrigger>
+              <TabsTrigger value="articles" className="flex items-center space-x-2">
+                <FileText className="w-4 h-4" />
+                <span>Articles</span>
+              </TabsTrigger>
               <TabsTrigger value="ads" className="flex items-center space-x-2">
                 <ImageIcon className="w-4 h-4" />
-                <span>Advertisements</span>
+                <span>Ads</span>
+              </TabsTrigger>
+              <TabsTrigger value="data-import" className="flex items-center space-x-2">
+                <Upload className="w-4 h-4" />
+                <span>Data Import</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex items-center space-x-2">
                 <BarChart3 className="w-4 h-4" />
@@ -90,7 +100,7 @@ const AdminDashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="trends" className="flex items-center space-x-2">
                 <TrendingUp className="w-4 h-4" />
-                <span>Search Trends</span>
+                <span>Trends</span>
               </TabsTrigger>
             </TabsList>
 
@@ -98,8 +108,16 @@ const AdminDashboard = () => {
               <CollegeManagement />
             </TabsContent>
 
+            <TabsContent value="articles">
+              <ArticleManagement />
+            </TabsContent>
+
             <TabsContent value="ads">
               <AdManagement />
+            </TabsContent>
+
+            <TabsContent value="data-import">
+              <DataImportWithSchema />
             </TabsContent>
 
             <TabsContent value="analytics">

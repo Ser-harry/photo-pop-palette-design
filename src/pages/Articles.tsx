@@ -1,59 +1,64 @@
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BookingModal from "@/components/BookingModal";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Eye, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
 const Articles = () => {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const categories = [
-    "All Articles", "All News", "Exam News", "College News", "Online Articles"
-  ];
-
-  const filters = [
-    "All", "Management", "Engineering", "Law", "Arts", "Science"
-  ];
-
-  const articles = [
-    {
-      id: 1,
-      title: "IIT Indore Seat Matrix 2025, Check Previous Year Seat Matrix",
-      author: "Souvik",
-      date: "June 14, 2025",
-      image: "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=300&h=200&fit=crop"
-    },
-    {
-      id: 2,
-      title: "IIT Delhi Seat Matrix 2025, Check Previous Years Seat Matrix",
-      author: "Souvik",
-      date: "June 14, 2025",
-      image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=300&h=200&fit=crop"
-    },
-    {
-      id: 3,
-      title: "IIT Indore JEE Advanced Cutoff 2025, Check Previous Years Cutoff",
-      author: "Souvik",
-      date: "June 14, 2025",
-      image: "https://images.unsplash.com/photo-1496307653780-42ee777d4833?w=300&h=200&fit=crop"
-    },
-    {
-      id: 4,
-      title: "NIT Jalandhar Seat Matrix 2025, 2024, 2023, 2022 by Category",
-      author: "Sanhita Kundu",
-      date: "June 14, 2025",
-      image: "https://images.unsplash.com/photo-1459767129954-1b1c1f9b9ace?w=300&h=200&fit=crop"
-    },
-    {
-      id: 5,
-      title: "Delhi NEET Cutoff 2025: AIIMS, MAMC Cutoff, Previous Years Cutoff",
-      author: "Souvik",
-      date: "June 14, 2025",
-      image: "https://images.unsplash.com/photo-1460574283810-2aab119d8511?w=300&h=200&fit=crop"
+  // Fetch published articles
+  const { data: articles, isLoading } = useQuery({
+    queryKey: ['published-articles'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('articles')
+        .select(`
+          *,
+          article_categories(name, color),
+          admin_users(email)
+        `)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
     }
-  ];
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ['article-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('article_categories')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Get category names for filters
+  const categoryNames = ["All", ...(categories?.map(cat => cat.name) || [])];
+
+  const filteredArticles = articles?.filter(article => {
+    if (activeCategory === "All") return true;
+    return article.article_categories?.name === activeCategory;
+  }) || [];
+
+  // Update article views
+  const incrementViews = async (articleId: string) => {
+    await supabase.rpc('increment_article_views', { article_id: articleId });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -66,7 +71,8 @@ const Articles = () => {
             <span className="bg-white text-red-500 px-3 py-1 rounded text-sm font-semibold">Latest News</span>
             <div className="flex-1 overflow-hidden">
               <div className="animate-marquee whitespace-nowrap">
-                IIT Delhi Seat Matrix 2025, Check Previous Year Seat Matrix | IIT Delhi Seat Matrix 2025, Check Previous Years Seat Matrix | IIT Indore JEE Advanced Cutoff 2025, Check Previous Years Cutoff
+                {articles?.slice(0, 3).map(article => article.title).join(' | ') || 
+                 'Latest education news and updates from colleges across Tamil Nadu'}
               </div>
             </div>
           </div>
@@ -89,7 +95,7 @@ const Articles = () => {
 
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-4 mb-8 border-b">
-          {categories.map((category) => (
+          {categoryNames.map((category) => (
             <button
               key={category}
               onClick={() => setActiveCategory(category)}
@@ -104,56 +110,87 @@ const Articles = () => {
           ))}
         </div>
 
-        {/* Filter Tags */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          {filters.map((filter) => (
-            <button
-              key={filter}
-              className={`px-4 py-2 rounded-full text-sm border transition-colors ${
-                filter === "All"
-                  ? "bg-blue-500 text-white border-blue-500"
-                  : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
-        </div>
-
         {/* Articles List */}
-        <div className="space-y-6">
-          {articles.map((article) => (
-            <Card key={article.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-              <CardContent className="p-0">
-                <div className="flex">
-                  <div className="flex-1 p-6">
-                    <h3 className="text-xl font-semibold mb-3 hover:text-blue-600 transition-colors">
-                      {article.title}
-                    </h3>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <div className="flex items-center mr-4">
-                        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center mr-2">
-                          <span className="text-white text-xs font-semibold">
-                            {article.author.charAt(0)}
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500">Loading articles...</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredArticles.map((article) => (
+              <Card 
+                key={article.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => incrementViews(article.id)}
+              >
+                <CardContent className="p-0">
+                  <div className="flex">
+                    <div className="flex-1 p-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-xl font-semibold hover:text-blue-600 transition-colors">
+                          {article.title}
+                        </h3>
+                        {article.featured && (
+                          <Badge variant="default" className="bg-orange-500">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {article.excerpt && (
+                        <p className="text-gray-600 mb-4 line-clamp-3">
+                          {article.excerpt}
+                        </p>
+                      )}
+                      
+                      <div className="flex items-center text-sm text-gray-600 space-x-4">
+                        <div className="flex items-center">
+                          <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center mr-2">
+                            <User className="w-3 h-3 text-white" />
+                          </div>
+                          <span className="font-medium text-orange-600">
+                            {article.admin_users?.email?.split('@')[0] || 'Admin'}
                           </span>
                         </div>
-                        <span className="font-medium text-orange-600">{article.author}</span>
+                        <span>{format(new Date(article.published_at || article.created_at), 'MMM dd, yyyy')}</span>
+                        {article.article_categories && (
+                          <Badge 
+                            variant="outline" 
+                            style={{ 
+                              backgroundColor: `${article.article_categories.color}20`, 
+                              color: article.article_categories.color 
+                            }}
+                          >
+                            {article.article_categories.name}
+                          </Badge>
+                        )}
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {article.views} views
+                        </span>
                       </div>
-                      <span>{article.date}</span>
                     </div>
+                    {article.featured_image && (
+                      <div className="w-48 p-6">
+                        <img
+                          src={article.featured_image}
+                          alt={article.title}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
                   </div>
-                  <div className="w-48 p-6">
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {filteredArticles.length === 0 && !isLoading && (
+          <div className="text-center py-12">
+            <p className="text-gray-500">No articles found in this category</p>
+          </div>
+        )}
       </div>
 
       <Footer />
