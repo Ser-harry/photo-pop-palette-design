@@ -1188,6 +1188,14 @@ export type Database = {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]
       }
+      increment_ad_clicks: {
+        Args: { ad_id: string }
+        Returns: undefined
+      }
+      increment_ad_impressions: {
+        Args: { ad_id: string }
+        Returns: undefined
+      }
       is_admin_user: {
         Args: { user_id: string }
         Returns: boolean

@@ -140,11 +140,12 @@ export async function deleteAd(id: string): Promise<void> {
 // Optimized impression tracking - increment directly without fetching first
 export async function trackAdImpression(adId: string): Promise<void> {
   try {
-    const { error } = await supabase.rpc('increment_ad_impressions', {
+    const { error } = await supabase.rpc('increment_ad_impressions' as any, {
       ad_id: adId
     });
     
     if (error) {
+      console.warn('RPC function not available, using fallback method');
       // Fallback to the old method if RPC function doesn't exist
       const { data: currentAd } = await supabase
         .from('advertisements')
@@ -167,11 +168,12 @@ export async function trackAdImpression(adId: string): Promise<void> {
 // Optimized click tracking - increment directly without fetching first
 export async function trackAdClick(adId: string): Promise<void> {
   try {
-    const { error } = await supabase.rpc('increment_ad_clicks', {
+    const { error } = await supabase.rpc('increment_ad_clicks' as any, {
       ad_id: adId
     });
     
     if (error) {
+      console.warn('RPC function not available, using fallback method');
       // Fallback to the old method if RPC function doesn't exist
       const { data: currentAd } = await supabase
         .from('advertisements')
