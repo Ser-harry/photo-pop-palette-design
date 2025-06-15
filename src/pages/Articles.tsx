@@ -55,15 +55,34 @@ const Articles = () => {
     return article.article_categories?.name === activeCategory;
   }) || [];
 
-  // Update article views using a simple update query
+  // Update article views by fetching current views and incrementing
   const incrementViews = async (articleId: string) => {
-    const { error } = await supabase
-      .from('articles')
-      .update({ views: supabase.raw('views + 1') })
-      .eq('id', articleId);
-    
-    if (error) {
-      console.error('Error updating views:', error);
+    try {
+      // First get the current article to know the current view count
+      const { data: currentArticle, error: fetchError } = await supabase
+        .from('articles')
+        .select('views')
+        .eq('id', articleId)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching current views:', fetchError);
+        return;
+      }
+
+      // Increment the view count
+      const newViews = (currentArticle.views || 0) + 1;
+      
+      const { error: updateError } = await supabase
+        .from('articles')
+        .update({ views: newViews })
+        .eq('id', articleId);
+      
+      if (updateError) {
+        console.error('Error updating views:', updateError);
+      }
+    } catch (error) {
+      console.error('Error incrementing views:', error);
     }
   };
 

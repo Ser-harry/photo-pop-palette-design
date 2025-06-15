@@ -83,23 +83,30 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
   };
 
   const saveMutation = useMutation({
-    mutationFn: async (data) => {
-      const saveData = {
-        ...data,
-        author_id: adminUser.id,
-        ...(data.status === 'published' && !article ? { published_at: new Date().toISOString() } : {})
-      };
-
+    mutationFn: async (data: {
+      title: string;
+      slug: string;
+      content: string;
+      excerpt: string;
+      category_id: string;
+      tags: string[];
+      status: string;
+      featured: boolean;
+      featured_image: string;
+      meta_description: string;
+      author_id: string;
+      published_at?: string;
+    }) => {
       if (article) {
         const { error } = await supabase
           .from('articles')
-          .update(saveData)
+          .update(data)
           .eq('id', article.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('articles')
-          .insert([saveData]);
+          .insert([data]);
         if (error) throw error;
       }
     },
@@ -126,7 +133,14 @@ const ArticleEditor = ({ article, categories, onSave, onCancel }) => {
       });
       return;
     }
-    saveMutation.mutate(formData);
+
+    const saveData = {
+      ...formData,
+      author_id: adminUser.id,
+      ...(formData.status === 'published' && !article ? { published_at: new Date().toISOString() } : {})
+    };
+
+    saveMutation.mutate(saveData);
   };
 
   return (
