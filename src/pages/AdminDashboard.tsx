@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,7 @@ import ArticleManagement from "@/components/admin/ArticleManagement";
 import DataImportWithSchema from "@/components/admin/DataImportWithSchema";
 import HomepageContentManagement from "@/components/admin/HomepageContentManagement";
 import CrmDashboard from "@/components/admin/CrmDashboard";
+import AdminSearchAutocomplete from "@/components/admin/AdminSearchAutocomplete";
 
 const AdminDashboard = () => {
   const { signOut, adminUser } = useAdminAuth();
@@ -21,6 +21,23 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     await signOut();
+  };
+
+  const handleSearchSelect = (suggestion: any) => {
+    // Navigate to relevant section based on suggestion type
+    switch (suggestion.type) {
+      case 'college':
+        setActiveTab('colleges');
+        break;
+      case 'article':
+        setActiveTab('articles');
+        break;
+      case 'contact':
+        setActiveTab('crm');
+        break;
+      default:
+        break;
+    }
   };
 
   const getRoleColor = (role: string) => {
@@ -69,10 +86,19 @@ const AdminDashboard = () => {
                   </div>
                 )}
               </div>
-              <Button onClick={handleLogout} variant="outline">
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
+              
+              <div className="flex items-center space-x-4">
+                <div className="w-80">
+                  <AdminSearchAutocomplete 
+                    placeholder="Search colleges, articles, contacts..."
+                    onSelect={handleSearchSelect}
+                  />
+                </div>
+                <Button onClick={handleLogout} variant="outline">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </div>
         </header>

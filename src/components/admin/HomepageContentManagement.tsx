@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -161,7 +160,10 @@ const HeroSectionManager = ({ content }: { content: DatabaseHomepageContent[] | 
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all homepage-related queries
       queryClient.invalidateQueries({ queryKey: ['homepage-content'] });
+      queryClient.invalidateQueries({ queryKey: ['homepage-college-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['homepage-news-articles'] });
       toast({ title: "Hero section updated successfully" });
     }
   });
@@ -234,7 +236,9 @@ const CollegeSectionsManager = ({ content }: { content: DatabaseHomepageContent[
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all homepage-related queries
       queryClient.invalidateQueries({ queryKey: ['homepage-content'] });
+      queryClient.invalidateQueries({ queryKey: ['homepage-college-sections'] });
       setEditingSection(null);
       toast({ title: "Section updated successfully" });
     }
@@ -425,7 +429,9 @@ const NewsSectionManager = ({
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all homepage-related queries
       queryClient.invalidateQueries({ queryKey: ['homepage-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['homepage-news-articles'] });
       setSelectedArticleId("");
       toast({ title: "Article added to homepage" });
     }
@@ -441,7 +447,9 @@ const NewsSectionManager = ({
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all homepage-related queries
       queryClient.invalidateQueries({ queryKey: ['homepage-articles'] });
+      queryClient.invalidateQueries({ queryKey: ['homepage-news-articles'] });
       toast({ title: "Article removed from homepage" });
     }
   });
