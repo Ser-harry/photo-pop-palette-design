@@ -1,3 +1,4 @@
+
 import React, { useMemo } from "react";
 import { Building2, FileText, Users, Target, MapPin } from "lucide-react";
 import { AdminSearchSuggestion } from "./types";
