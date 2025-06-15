@@ -55,9 +55,16 @@ const Articles = () => {
     return article.article_categories?.name === activeCategory;
   }) || [];
 
-  // Update article views
+  // Update article views using a simple update query
   const incrementViews = async (articleId: string) => {
-    await supabase.rpc('increment_article_views', { article_id: articleId });
+    const { error } = await supabase
+      .from('articles')
+      .update({ views: supabase.raw('views + 1') })
+      .eq('id', articleId);
+    
+    if (error) {
+      console.error('Error updating views:', error);
+    }
   };
 
   return (

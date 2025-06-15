@@ -51,7 +51,7 @@ const CategoryManagement = ({ categories }) => {
   };
 
   const saveMutation = useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async (data: { name: string; slug: string; description: string; color: string }) => {
       if (editingCategory) {
         const { error } = await supabase
           .from('article_categories')
@@ -83,7 +83,7 @@ const CategoryManagement = ({ categories }) => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (categoryId) => {
+    mutationFn: async (categoryId: string) => {
       const { error } = await supabase
         .from('article_categories')
         .delete()

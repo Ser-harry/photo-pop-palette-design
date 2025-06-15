@@ -18,7 +18,7 @@ const ArticleList = ({ articles, isLoading, onEdit }) => {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
-    mutationFn: async (articleId) => {
+    mutationFn: async (articleId: string) => {
       const { error } = await supabase
         .from('articles')
         .delete()
@@ -43,7 +43,7 @@ const ArticleList = ({ articles, isLoading, onEdit }) => {
   });
 
   const toggleStatusMutation = useMutation({
-    mutationFn: async ({ articleId, newStatus }) => {
+    mutationFn: async ({ articleId, newStatus }: { articleId: string; newStatus: string }) => {
       const updateData = { 
         status: newStatus,
         ...(newStatus === 'published' ? { published_at: new Date().toISOString() } : {})
