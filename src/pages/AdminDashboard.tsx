@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload, Home, Database, Users } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import AdminSearchAutocomplete from "@/components/admin/AdminSearchAutocomplete";
 import AdminErrorBoundary from "@/components/admin/AdminErrorBoundary";
 
 // Lazy imports to prevent circular dependency issues
@@ -26,24 +26,6 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     await signOut();
-  };
-
-  const handleSearchSelect = (suggestion: any) => {
-    // Navigate to relevant section based on suggestion type
-    switch (suggestion.type) {
-      case 'college':
-        setActiveTab('colleges');
-        break;
-      case 'article':
-        setActiveTab('articles');
-        break;
-      case 'contact':
-      case 'lead':
-        setActiveTab('crm');
-        break;
-      default:
-        break;
-    }
   };
 
   const getRoleColor = (role: string) => {
@@ -94,18 +76,10 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 
-                <div className="flex items-center space-x-4">
-                  <div className="w-80">
-                    <AdminSearchAutocomplete 
-                      placeholder="Search colleges, articles, contacts, leads..."
-                      onSelect={handleSearchSelect}
-                    />
-                  </div>
-                  <Button onClick={handleLogout} variant="outline">
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Logout
-                  </Button>
-                </div>
+                <Button onClick={handleLogout} variant="outline">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
               </div>
             </div>
           </header>
