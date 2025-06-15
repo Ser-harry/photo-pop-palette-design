@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser, useClerk, SignedIn, SignedOut } from "@clerk/clerk-react";
 import {
   DropdownMenu,
@@ -18,8 +18,10 @@ interface HeaderProps {
 
 const Header = ({ onBookingClick }: HeaderProps) => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useUser();
   const { signOut } = useClerk();
+  const navigate = useNavigate();
 
   const navItems = [
     {
@@ -93,6 +95,13 @@ const Header = ({ onBookingClick }: HeaderProps) => {
     signOut();
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/colleges?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
@@ -154,14 +163,16 @@ const Header = ({ onBookingClick }: HeaderProps) => {
 
           {/* Search and CTA */}
           <div className="flex items-center space-x-4">
-            {/* Search Bar */}
-            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
+            {/* Search Bar - Now functional */}
+            <form onSubmit={handleSearch} className="flex items-center bg-gray-100 rounded-lg px-3 py-2 min-w-[300px]">
               <Search size={18} className="text-gray-500 mr-2" />
               <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search colleges, courses..."
                 className="bg-transparent border-none text-gray-700 placeholder:text-gray-500 focus:ring-0 focus:outline-none"
               />
-            </div>
+            </form>
 
             {/* Authentication Section */}
             <SignedOut>
