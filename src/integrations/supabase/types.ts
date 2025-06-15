@@ -183,6 +183,48 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_daily_stats: {
+        Row: {
+          ad_clicks: number | null
+          ad_impressions: number | null
+          avg_session_duration: number | null
+          bounce_rate: number | null
+          created_at: string
+          date: string
+          id: string
+          total_page_views: number | null
+          total_searches: number | null
+          unique_visitors: number | null
+          updated_at: string
+        }
+        Insert: {
+          ad_clicks?: number | null
+          ad_impressions?: number | null
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date: string
+          id?: string
+          total_page_views?: number | null
+          total_searches?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ad_clicks?: number | null
+          ad_impressions?: number | null
+          avg_session_duration?: number | null
+          bounce_rate?: number | null
+          created_at?: string
+          date?: string
+          id?: string
+          total_page_views?: number | null
+          total_searches?: number | null
+          unique_visitors?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       article_categories: {
         Row: {
           color: string | null
@@ -461,6 +503,192 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      crm_contacts: {
+        Row: {
+          contact_type: string
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          contact_type?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          contact_type?: string
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_interactions: {
+        Row: {
+          contact_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          interaction_type: string
+          lead_id: string | null
+          next_action: string | null
+          next_action_date: string | null
+          outcome: string | null
+          subject: string | null
+        }
+        Insert: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interaction_type: string
+          lead_id?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome?: string | null
+          subject?: string | null
+        }
+        Update: {
+          contact_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interaction_type?: string
+          lead_id?: string | null
+          next_action?: string | null
+          next_action_date?: string | null
+          outcome?: string | null
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_interactions_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interactions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_interactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_leads: {
+        Row: {
+          assigned_to: string | null
+          category: string | null
+          contact_id: string | null
+          created_at: string
+          expected_admission_year: number | null
+          id: string
+          interested_colleges: string[] | null
+          last_contacted: string | null
+          lead_source: string | null
+          notes: string | null
+          preferred_branches: string[] | null
+          preferred_district: string | null
+          priority: string
+          status: string
+          tnea_marks: number | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string | null
+          contact_id?: string | null
+          created_at?: string
+          expected_admission_year?: number | null
+          id?: string
+          interested_colleges?: string[] | null
+          last_contacted?: string | null
+          lead_source?: string | null
+          notes?: string | null
+          preferred_branches?: string[] | null
+          preferred_district?: string | null
+          priority?: string
+          status?: string
+          tnea_marks?: number | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string | null
+          contact_id?: string | null
+          created_at?: string
+          expected_admission_year?: number | null
+          id?: string
+          interested_colleges?: string[] | null
+          last_contacted?: string | null
+          lead_source?: string | null
+          notes?: string | null
+          preferred_branches?: string[] | null
+          preferred_district?: string | null
+          priority?: string
+          status?: string
+          tnea_marks?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_leads_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_leads_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "crm_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cutoff_data: {
         Row: {
@@ -952,6 +1180,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aggregate_daily_analytics: {
+        Args: { target_date?: string }
+        Returns: undefined
+      }
       get_admin_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]

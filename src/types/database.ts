@@ -1,4 +1,3 @@
-
 export interface DatabaseCollege {
   id: string;
   name: string;
@@ -174,4 +173,65 @@ export interface DatabaseHomepageArticle {
   section: string;
   is_active: boolean;
   created_at: string;
+}
+
+export interface DatabaseCrmContact {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  contact_type: string;
+  source?: string;
+  status: string;
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
+
+export interface DatabaseCrmLead {
+  id: string;
+  contact_id?: string;
+  lead_source?: string;
+  status: string;
+  priority: string;
+  interested_colleges?: string[];
+  preferred_branches?: string[];
+  tnea_marks?: number;
+  category?: string;
+  preferred_district?: string;
+  expected_admission_year?: number;
+  notes?: string;
+  assigned_to?: string;
+  created_at: string;
+  updated_at: string;
+  last_contacted?: string;
+}
+
+export interface DatabaseCrmInteraction {
+  id: string;
+  contact_id?: string;
+  lead_id?: string;
+  interaction_type: string;
+  subject?: string;
+  description?: string;
+  outcome?: string;
+  next_action?: string;
+  next_action_date?: string;
+  created_by?: string;
+  created_at: string;
+}
+
+export interface DatabaseAnalyticsDailyStats {
+  id: string;
+  date: string;
+  total_page_views: number;
+  unique_visitors: number;
+  total_searches: number;
+  ad_clicks: number;
+  ad_impressions: number;
+  bounce_rate: number;
+  avg_session_duration: number;
+  created_at: string;
+  updated_at: string;
 }

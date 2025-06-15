@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload, Home, Database } from "lucide-react";
+import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload, Home, Database, Users } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import EnhancedCollegeManagement from "@/components/admin/EnhancedCollegeManagement";
@@ -13,6 +13,7 @@ import SearchTrends from "@/components/admin/SearchTrends";
 import ArticleManagement from "@/components/admin/ArticleManagement";
 import DataImportWithSchema from "@/components/admin/DataImportWithSchema";
 import HomepageContentManagement from "@/components/admin/HomepageContentManagement";
+import CrmDashboard from "@/components/admin/CrmDashboard";
 
 const AdminDashboard = () => {
   const { signOut, adminUser } = useAdminAuth();
@@ -78,7 +79,7 @@ const AdminDashboard = () => {
 
         <div className="max-w-7xl mx-auto px-4 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="colleges" className="flex items-center space-x-2">
                 <GraduationCap className="w-4 h-4" />
                 <span>Colleges</span>
@@ -94,6 +95,10 @@ const AdminDashboard = () => {
               <TabsTrigger value="ads" className="flex items-center space-x-2">
                 <ImageIcon className="w-4 h-4" />
                 <span>Ads</span>
+              </TabsTrigger>
+              <TabsTrigger value="crm" className="flex items-center space-x-2">
+                <Users className="w-4 h-4" />
+                <span>CRM</span>
               </TabsTrigger>
               <TabsTrigger value="data-import" className="flex items-center space-x-2">
                 <Upload className="w-4 h-4" />
@@ -123,6 +128,10 @@ const AdminDashboard = () => {
 
             <TabsContent value="ads">
               <AdManagement />
+            </TabsContent>
+
+            <TabsContent value="crm">
+              <CrmDashboard />
             </TabsContent>
 
             <TabsContent value="data-import">
