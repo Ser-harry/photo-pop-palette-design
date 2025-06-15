@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -5,15 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, BarChart3, GraduationCap, ImageIcon, TrendingUp, User, Shield, FileText, Upload, Home, Database, Users } from "lucide-react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import EnhancedCollegeManagement from "@/components/admin/EnhancedCollegeManagement";
-import AdManagement from "@/components/admin/AdManagement";
-import AnalyticsDashboard from "@/components/admin/AnalyticsDashboard";
-import SearchTrends from "@/components/admin/SearchTrends";
-import ArticleManagement from "@/components/admin/ArticleManagement";
-import DataImportWithSchema from "@/components/admin/DataImportWithSchema";
-import HomepageContentManagement from "@/components/admin/HomepageContentManagement";
-import CrmDashboard from "@/components/admin/CrmDashboard";
-import AdminSearchAutocomplete from "@/components/admin/AdminSearchAutocomplete";
+
+// Lazy imports to prevent circular dependency issues
+import { lazy, Suspense } from "react";
+
+const EnhancedCollegeManagement = lazy(() => import("@/components/admin/EnhancedCollegeManagement"));
+const AdManagement = lazy(() => import("@/components/admin/AdManagement"));
+const AnalyticsDashboard = lazy(() => import("@/components/admin/AnalyticsDashboard"));
+const SearchTrends = lazy(() => import("@/components/admin/SearchTrends"));
+const ArticleManagement = lazy(() => import("@/components/admin/ArticleManagement"));
+const DataImportWithSchema = lazy(() => import("@/components/admin/DataImportWithSchema"));
+const HomepageContentManagement = lazy(() => import("@/components/admin/HomepageContentManagement"));
+const CrmDashboard = lazy(() => import("@/components/admin/CrmDashboard"));
+const AdminSearchAutocomplete = lazy(() => import("@/components/admin/AdminSearchAutocomplete"));
 
 const AdminDashboard = () => {
   const { signOut, adminUser } = useAdminAuth();
@@ -90,10 +95,12 @@ const AdminDashboard = () => {
               
               <div className="flex items-center space-x-4">
                 <div className="w-80">
-                  <AdminSearchAutocomplete 
-                    placeholder="Search colleges, articles, contacts, leads..."
-                    onSelect={handleSearchSelect}
-                  />
+                  <Suspense fallback={<div className="h-10 bg-gray-100 rounded animate-pulse" />}>
+                    <AdminSearchAutocomplete 
+                      placeholder="Search colleges, articles, contacts, leads..."
+                      onSelect={handleSearchSelect}
+                    />
+                  </Suspense>
                 </div>
                 <Button onClick={handleLogout} variant="outline">
                   <LogOut className="w-4 h-4 mr-2" />
@@ -142,35 +149,51 @@ const AdminDashboard = () => {
             </TabsList>
 
             <TabsContent value="colleges">
-              <EnhancedCollegeManagement />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <EnhancedCollegeManagement />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="articles">
-              <ArticleManagement />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <ArticleManagement />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="homepage">
-              <HomepageContentManagement />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <HomepageContentManagement />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="ads">
-              <AdManagement />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <AdManagement />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="crm">
-              <CrmDashboard />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <CrmDashboard />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="data-import">
-              <DataImportWithSchema />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <DataImportWithSchema />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="analytics">
-              <AnalyticsDashboard />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <AnalyticsDashboard />
+              </Suspense>
             </TabsContent>
 
             <TabsContent value="trends">
-              <SearchTrends />
+              <Suspense fallback={<div className="flex items-center justify-center h-64">Loading...</div>}>
+                <SearchTrends />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>
