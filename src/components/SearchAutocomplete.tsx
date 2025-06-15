@@ -226,7 +226,9 @@ const SearchAutocomplete = ({
             className={cn(
               "w-full transition-all duration-200",
               showIcon ? "pl-10" : "pl-4",
-              variant === 'hero' ? "pr-4 py-4 text-lg border-none bg-transparent focus:ring-0 focus:outline-none" : "pr-4",
+              variant === 'hero' 
+                ? "pr-4 py-4 text-lg border-none bg-transparent focus:ring-0 focus:outline-none text-gray-700 placeholder:text-gray-500" 
+                : "pr-4",
               // Remove default focus styles that cause black outline
               "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
               inputClassName
