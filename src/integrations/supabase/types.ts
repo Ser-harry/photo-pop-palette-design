@@ -1184,6 +1184,10 @@ export type Database = {
         Args: { target_date?: string }
         Returns: undefined
       }
+      check_admin_login_rate_limit: {
+        Args: { email_input: string }
+        Returns: boolean
+      }
       get_admin_role: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["admin_role"]

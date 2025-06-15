@@ -1,73 +1,90 @@
 
-/**
- * Sanitizes and validates input strings
- */
-export const sanitizeInput = (input: string): string => {
-  if (!input) return '';
-  
-  // Remove dangerous characters
-  return input
-    .replace(/[<>\"']/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/data:/gi, '')
-    .trim();
-};
+import { SecurityUtils } from './securityUtils';
 
 /**
- * Validates slug format
+ * Legacy security functions - migrated to SecurityUtils
+ * @deprecated Use SecurityUtils instead
  */
+
+export const sanitizeInput = (input: string): string => {
+  return SecurityUtils.sanitizeText(input);
+};
+
 export const isValidSlug = (slug: string): boolean => {
   if (!slug || typeof slug !== 'string') return false;
-  
-  // Allow only lowercase letters, numbers, and hyphens
-  // Length between 1 and 100 characters
   return /^[a-z0-9-]{1,100}$/.test(slug);
 };
 
-/**
- * Validates email format
- */
 export const isValidEmail = (email: string): boolean => {
-  if (!email || typeof email !== 'string') return false;
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email) && email.length <= 254;
+  return SecurityUtils.isValidEmail(email);
 };
 
-/**
- * Validates admin role
- */
 export const isValidAdminRole = (role: string): boolean => {
-  const validRoles = ['super_admin', 'admin', 'moderator'];
-  return validRoles.includes(role);
+  return SecurityUtils.isValidAdminRole(role);
 };
 
-/**
- * Escapes HTML to prevent XSS
- */
 export const escapeHtml = (text: string): string => {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
 };
 
-/**
- * Rate limiting check (basic client-side)
- */
 export const checkRateLimit = (key: string, maxRequests: number, windowMs: number): boolean => {
-  const now = Date.now();
-  const requests = JSON.parse(localStorage.getItem(`rateLimit_${key}`) || '[]');
+  return SecurityUtils.checkRateLimit(key, maxRequests, windowMs);
+};
+
+/**
+ * Enhanced route validation
+ */
+export const validateRoute = (path: string): boolean => {
+  if (!path || typeof path !== 'string') return false;
   
-  // Remove old requests outside the window
-  const validRequests = requests.filter((timestamp: number) => now - timestamp < windowMs);
+  // Check for dangerous patterns
+  const dangerousPatterns = [
+    /\.\./,           // Directory traversal
+    /%/,              // URL encoding attempts
+    /[<>]/,           // HTML injection
+    /javascript:/i,   // JavaScript protocol
+    /data:/i,         // Data protocol
+    /vbscript:/i,     // VBScript protocol
+    /file:/i,         // File protocol
+    /\0/,             // Null bytes
+    /[^\x20-\x7E]/,   // Non-printable characters
+  ];
   
-  if (validRequests.length >= maxRequests) {
-    return false; // Rate limit exceeded
-  }
+  return !dangerousPatterns.some(pattern => pattern.test(path));
+};
+
+/**
+ * Content Security Policy headers
+ */
+export const getSecurityHeaders = () => {
+  return {
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' https://api.clerk.dev; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.clerk.dev https://clerk.dev https://*.supabase.co;",
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+  };
+};
+
+/**
+ * Validate advertisement data for XSS prevention
+ */
+export const validateAdvertisementData = (data: any): boolean => {
+  if (!data || typeof data !== 'object') return false;
   
-  // Add current request
-  validRequests.push(now);
-  localStorage.setItem(`rateLimit_${key}`, JSON.stringify(validRequests));
+  const requiredFields = ['title', 'image_url', 'target_url', 'cta_text'];
+  const hasAllFields = requiredFields.every(field => data[field] && typeof data[field] === 'string');
   
-  return true;
+  if (!hasAllFields) return false;
+  
+  // Validate URL fields
+  const urlFields = ['image_url', 'target_url'];
+  const validUrls = urlFields.every(field => {
+    const url = data[field];
+    return /^https?:\/\/.+/.test(url) && !url.includes('<') && !url.includes('>');
+  });
+  
+  return validUrls;
 };
