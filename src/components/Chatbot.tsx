@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MessageCircle, Send, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@/hooks/useSession";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   sender: "user" | "bot";
@@ -40,28 +41,32 @@ export default function Chatbot() {
     setInput("");
 
     try {
-      // Call your backend API (replace with real endpoint)
-      const res = await fetch("/api/answer-query", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // You can attach the session id if needed here
-        },
-        body: JSON.stringify({ 
+      console.log("Sending query to answer-query function:", content);
+      
+      const { data, error } = await supabase.functions.invoke('answer-query', {
+        body: { 
           query: content,
           sessionId: sessionId 
-        }),
+        },
       });
-      if (!res.ok) throw new Error("No response from bot.");
-      const data = await res.json();
+
+      if (error) {
+        console.error("Supabase function error:", error);
+        throw new Error(error.message || "No response from bot.");
+      }
+
+      const response = data?.answer || "Sorry, I couldn't find an answer.";
+      console.log("Received response:", response);
+      
       setMessages((msgs) => [
         ...msgs,
-        { sender: "bot", text: data.answer || "Sorry, I couldn't find an answer." },
+        { sender: "bot", text: response },
       ]);
     } catch (e: any) {
+      console.error("Error calling chatbot:", e);
       setMessages((msgs) => [
         ...msgs,
-        { sender: "bot", text: "There was an error processing your request." },
+        { sender: "bot", text: "There was an error processing your request. Please try again." },
       ]);
       toast({
         title: "Error",
@@ -113,6 +118,14 @@ export default function Chatbot() {
             </div>
           </div>
         ))}
+        {loading && (
+          <div className="flex justify-start">
+            <div className="bg-gray-200 text-gray-800 px-3 py-2 rounded-lg shadow-sm max-w-[240px] flex items-start gap-2 text-sm">
+              <MessageCircle size={14} className="mt-0.5" />
+              <span className="break-words">Thinking...</span>
+            </div>
+          </div>
+        )}
         <div ref={bottomRef}></div>
       </div>
       <form
