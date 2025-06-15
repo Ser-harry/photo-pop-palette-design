@@ -38,6 +38,32 @@ export async function getAllAds(): Promise<DatabaseAdvertisement[]> {
   return (data || []) as DatabaseAdvertisement[];
 }
 
+// Enhanced image URL validation
+const isValidImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const urlObj = new URL(url);
+    
+    // Check for common image extensions
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    const hasImageExtension = imageExtensions.some(ext => 
+      urlObj.pathname.toLowerCase().endsWith(ext)
+    );
+    
+    // Check for common image hosting patterns
+    const imageHosts = ['imgur.com', 'cloudinary.com', 'unsplash.com', 'pixabay.com', 'images.unsplash.com'];
+    const isImageHost = imageHosts.some(host => urlObj.hostname.includes(host));
+    
+    // Check for image-related paths or parameters
+    const hasImagePath = urlObj.pathname.includes('/image') || 
+                        urlObj.pathname.includes('/img') ||
+                        urlObj.searchParams.has('format');
+    
+    return hasImageExtension || isImageHost || hasImagePath;
+  } catch {
+    return false;
+  }
+};
+
 export async function createAd(adData: {
   title: string;
   image_url: string;
@@ -63,11 +89,16 @@ export async function createAd(adData: {
     throw new Error('Start date cannot be after end date');
   }
 
-  // Validate image URL format
+  // Enhanced image URL validation
+  if (!await isValidImageUrl(adData.image_url)) {
+    throw new Error('Please provide a valid image URL (must end with .jpg, .png, .gif, .webp, .svg or be from a recognized image hosting service)');
+  }
+
+  // Validate target URL format
   try {
-    new URL(adData.image_url);
+    new URL(adData.target_url);
   } catch {
-    throw new Error('Invalid image URL format');
+    throw new Error('Invalid target URL format');
   }
 
   const { data, error } = await supabase
@@ -101,12 +132,17 @@ export async function updateAd(id: string, adData: Partial<{
   end_date: string;
   is_active: boolean;
 }>): Promise<DatabaseAdvertisement> {
-  // Validate image URL if provided
-  if (adData.image_url) {
+  // Enhanced image URL validation if provided
+  if (adData.image_url && !await isValidImageUrl(adData.image_url)) {
+    throw new Error('Please provide a valid image URL (must end with .jpg, .png, .gif, .webp, .svg or be from a recognized image hosting service)');
+  }
+
+  // Validate target URL if provided
+  if (adData.target_url) {
     try {
-      new URL(adData.image_url);
+      new URL(adData.target_url);
     } catch {
-      throw new Error('Invalid image URL format');
+      throw new Error('Invalid target URL format');
     }
   }
 

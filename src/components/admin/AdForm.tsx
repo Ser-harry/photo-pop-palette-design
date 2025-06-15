@@ -23,6 +23,29 @@ const AdForm = ({ ad, onSave, onCancel }: AdFormProps) => {
     is_active: ad?.is_active || true
   });
 
+  const [imagePreviewError, setImagePreviewError] = useState(false);
+
+  const isValidImageUrl = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url);
+      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+      const hasImageExtension = imageExtensions.some(ext => 
+        urlObj.pathname.toLowerCase().endsWith(ext)
+      );
+      
+      const imageHosts = ['imgur.com', 'cloudinary.com', 'unsplash.com', 'pixabay.com', 'images.unsplash.com'];
+      const isImageHost = imageHosts.some(host => urlObj.hostname.includes(host));
+      
+      const hasImagePath = urlObj.pathname.includes('/image') || 
+                          urlObj.pathname.includes('/img') ||
+                          urlObj.searchParams.has('format');
+      
+      return hasImageExtension || isImageHost || hasImagePath;
+    } catch {
+      return false;
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form data being submitted:', formData);
@@ -36,10 +59,23 @@ const AdForm = ({ ad, onSave, onCancel }: AdFormProps) => {
       alert('Please enter an image URL');
       return;
     }
+    if (!isValidImageUrl(formData.image_url)) {
+      alert('Please provide a valid image URL (must end with .jpg, .png, .gif, .webp, .svg or be from a recognized image hosting service)');
+      return;
+    }
     if (!formData.target_url.trim()) {
       alert('Please enter a target URL');
       return;
     }
+    
+    // Validate target URL
+    try {
+      new URL(formData.target_url);
+    } catch {
+      alert('Please enter a valid target URL');
+      return;
+    }
+    
     if (!formData.cta_text.trim()) {
       alert('Please enter CTA text');
       return;
@@ -53,7 +89,17 @@ const AdForm = ({ ad, onSave, onCancel }: AdFormProps) => {
       return;
     }
     
+    if (new Date(formData.start_date) > new Date(formData.end_date)) {
+      alert('Start date cannot be after end date');
+      return;
+    }
+    
     onSave(formData);
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    setFormData({...formData, image_url: url});
+    setImagePreviewError(false);
   };
 
   return (
@@ -84,10 +130,30 @@ const AdForm = ({ ad, onSave, onCancel }: AdFormProps) => {
         <Input
           id="image_url"
           value={formData.image_url}
-          onChange={(e) => setFormData({...formData, image_url: e.target.value})}
+          onChange={(e) => handleImageUrlChange(e.target.value)}
           placeholder="https://example.com/image.jpg"
           required
         />
+        {formData.image_url && (
+          <div className="mt-2">
+            {imagePreviewError || !isValidImageUrl(formData.image_url) ? (
+              <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
+                ⚠️ This URL might not be a valid image URL. Please ensure it ends with .jpg, .png, .gif, .webp, .svg or is from a recognized image hosting service.
+              </div>
+            ) : (
+              <div className="relative">
+                <img 
+                  src={formData.image_url} 
+                  alt="Preview" 
+                  className="max-w-xs h-24 object-cover rounded border"
+                  onError={() => setImagePreviewError(true)}
+                  onLoad={() => setImagePreviewError(false)}
+                />
+                <span className="text-xs text-green-600 mt-1 block">✓ Image preview loaded successfully</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       
       <div>
