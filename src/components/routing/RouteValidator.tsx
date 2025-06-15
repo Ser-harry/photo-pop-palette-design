@@ -32,11 +32,20 @@ const RouteValidator = ({ children }: RouteValidatorProps) => {
       }
     }
 
-    // Validate admin routes
-    if (path.startsWith('/admin') && !path.match(/^\/admin(\/login|\/unauthorized|\/dashboard)?$/)) {
-      console.error('Invalid admin route:', path);
-      navigate('/admin/unauthorized', { replace: true });
-      return;
+    // Fix: Updated admin routes validation to allow /admin and /admin/dashboard
+    if (path.startsWith('/admin')) {
+      const validAdminRoutes = [
+        '/admin',
+        '/admin/login',
+        '/admin/unauthorized',
+        '/admin/dashboard'
+      ];
+      
+      if (!validAdminRoutes.includes(path)) {
+        console.error('Invalid admin route:', path);
+        navigate('/admin/unauthorized', { replace: true });
+        return;
+      }
     }
 
     // Log route access for security monitoring

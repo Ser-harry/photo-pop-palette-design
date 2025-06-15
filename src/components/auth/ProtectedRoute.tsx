@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { Loader2 } from 'lucide-react';
+import AdminErrorBoundary from '@/components/admin/AdminErrorBoundary';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,12 +16,21 @@ const ProtectedRoute = ({
   requiredRole = 'admin', 
   redirectTo = '/admin/login' 
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, adminUser, loading } = useAdminAuth();
+  const { isAuthenticated, adminUser, loading, error } = useAdminAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading) {
+      console.log('ProtectedRoute check:', { isAuthenticated, adminUser: adminUser?.role, loading, error });
+      
+      if (error) {
+        console.error('Auth error in ProtectedRoute:', error);
+        navigate('/admin/login');
+        return;
+      }
+      
       if (!isAuthenticated) {
+        console.log('Not authenticated, redirecting to login');
         navigate(redirectTo);
         return;
       }
@@ -37,12 +47,13 @@ const ProtectedRoute = ({
         const requiredRoleLevel = roleHierarchy[requiredRole];
 
         if (userRoleLevel < requiredRoleLevel) {
+          console.log('Insufficient role level, redirecting to unauthorized');
           navigate('/admin/unauthorized');
           return;
         }
       }
     }
-  }, [isAuthenticated, adminUser, loading, navigate, requiredRole, redirectTo]);
+  }, [isAuthenticated, adminUser, loading, error, navigate, requiredRole, redirectTo]);
 
   if (loading) {
     return (
@@ -55,11 +66,26 @@ const ProtectedRoute = ({
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-2">Authentication Error</p>
+          <p className="text-gray-600 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <AdminErrorBoundary>
+      {children}
+    </AdminErrorBoundary>
+  );
 };
 
 export default ProtectedRoute;
