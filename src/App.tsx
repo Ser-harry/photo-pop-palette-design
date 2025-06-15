@@ -1,3 +1,4 @@
+
 import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import RouteValidator from "@/components/routing/RouteValidator";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import FloatingChatWidget from "@/components/FloatingChatWidget";
 import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
@@ -23,7 +25,6 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminUnauthorized = lazy(() => import("./pages/AdminUnauthorized"));
-const ChatPageWrapper = lazy(() => import("./pages/Chat"));
 
 function App() {
   return (
@@ -57,12 +58,13 @@ function App() {
                   } 
                 />
                 
-                <Route path="/chat" element={<Suspense fallback={<div>Loading...</div>}><ChatPageWrapper /></Suspense>} />
-                
                 <Route path="/404" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
+            
+            {/* Global Floating Chat Widget */}
+            <FloatingChatWidget />
           </RouteValidator>
         </BrowserRouter>
       </TooltipProvider>

@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { MessageCircle, Send, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "@/hooks/useSession";
@@ -80,66 +79,65 @@ export default function Chatbot() {
 
   if (!isAuthenticated) {
     return (
-      <div className="p-6 flex flex-col items-center justify-center min-h-80">
-        <MessageCircle className="mb-2 text-orange-500" size={40} />
-        <div className="text-lg mb-2 font-medium">Loading session...</div>
-        <p className="mt-4 text-sm text-gray-500">Please wait while we initialize your session.</p>
+      <div className="p-4 flex flex-col items-center justify-center min-h-40">
+        <MessageCircle className="mb-2 text-orange-500" size={32} />
+        <div className="text-sm mb-2 font-medium">Loading session...</div>
+        <p className="text-xs text-gray-500 text-center">Please wait while we initialize your session.</p>
       </div>
     );
   }
 
   return (
-    <Card className="max-w-md mx-auto w-full shadow-md">
-      <CardContent className="p-4">
-        <div className="h-80 overflow-y-auto mb-4 bg-gray-50 rounded flex flex-col gap-4 px-2 py-2">
-          {messages.map((msg, i) => (
+    <div className="p-4">
+      <div className="h-64 overflow-y-auto mb-4 bg-gray-50 rounded flex flex-col gap-3 px-3 py-3">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={
+              msg.sender === "user"
+                ? "flex justify-end"
+                : "flex justify-start"
+            }
+          >
             <div
-              key={i}
               className={
-                msg.sender === "user"
-                  ? "flex justify-end"
-                  : "flex justify-start"
+                (msg.sender === "user"
+                  ? "bg-orange-400 text-white"
+                  : "bg-gray-200 text-gray-800") +
+                " px-3 py-2 rounded-lg shadow-sm max-w-[240px] flex items-start gap-2 text-sm"
               }
             >
-              <div
-                className={
-                  (msg.sender === "user"
-                    ? "bg-orange-400 text-white"
-                    : "bg-gray-200 text-gray-800") +
-                  " px-3 py-2 rounded-lg shadow-md max-w-xs flex items-center gap-2"
-                }
-              >
-                {msg.sender === "user" && <User size={18} />}
-                {msg.sender === "bot" && <MessageCircle size={18} />}
-                <span className="break-words">{msg.text}</span>
-              </div>
+              {msg.sender === "user" && <User size={14} className="mt-0.5" />}
+              {msg.sender === "bot" && <MessageCircle size={14} className="mt-0.5" />}
+              <span className="break-words">{msg.text}</span>
             </div>
-          ))}
-          <div ref={bottomRef}></div>
-        </div>
-        <form
-          className="flex gap-2"
-          onSubmit={handleSend}
-          autoComplete="off"
-          spellCheck={false}
+          </div>
+        ))}
+        <div ref={bottomRef}></div>
+      </div>
+      <form
+        className="flex gap-2"
+        onSubmit={handleSend}
+        autoComplete="off"
+        spellCheck={false}
+      >
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about colleges..."
+          className="flex-1 text-sm"
+          disabled={loading}
+          minLength={1}
+        />
+        <Button
+          type="submit"
+          disabled={loading || !input.trim()}
+          className="px-3"
+          size="sm"
         >
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your college or FAQ question..."
-            className="flex-1"
-            disabled={loading}
-            minLength={1}
-          />
-          <Button
-            type="submit"
-            disabled={loading || !input.trim()}
-            className="flex gap-1"
-          >
-            <Send size={18} /> {loading ? "Sending..." : "Send"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+          <Send size={14} />
+        </Button>
+      </form>
+    </div>
   );
 }
